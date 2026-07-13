@@ -1,4 +1,4 @@
-<img width="1600" height="900" alt="dashboard" src="https://github.com/user-attachments/assets/74e883e1-01cb-446f-992a-d4d6ba9c5ecf" /># IoT-Based Industrial Wastewater Quality Monitoring and Alert System
+# IoT-Based Industrial Wastewater Quality Monitoring and Alert System
 
 A web-based IoT monitoring platform designed to monitor industrial wastewater quality using parameters such as **pH, Total Dissolved Solids (TDS), Turbidity, and Temperature**. The project aims to provide real-time monitoring, analytical visualization, alert generation, and reporting to support environmental safety and pollution control.
 
@@ -65,19 +65,19 @@ The complete system will collect sensor data using an ESP32 microcontroller, tra
 ## 📸 Screenshots
 
 - Dashboard
-- <img width="1600" height="900" alt="dashboard" src="https://github.com/user-attachments/assets/14129513-164e-4b33-b1d8-0e28de7f3916" />
+  <img width="1600" height="900" alt="dashboard" src="https://github.com/user-attachments/assets/14129513-164e-4b33-b1d8-0e28de7f3916" />
 
 - Analytics
-- <img width="1600" height="900" alt="analytics" src="https://github.com/user-attachments/assets/81c4a466-3200-4d7f-8069-5d6463a3dd1e" />
+  <img width="1600" height="900" alt="analytics" src="https://github.com/user-attachments/assets/81c4a466-3200-4d7f-8069-5d6463a3dd1e" />
 
 - Alerts
-- <img width="1600" height="900" alt="alerts" src="https://github.com/user-attachments/assets/b438b820-5991-4636-bf92-e4870847a4c7" />
+  <img width="1600" height="900" alt="alerts" src="https://github.com/user-attachments/assets/b438b820-5991-4636-bf92-e4870847a4c7" />
 
 - Reports
-- <img width="1300" height="860" alt="report image" src="https://github.com/user-attachments/assets/00389c61-f440-4315-a3f3-1836bd9af734" />
+  <img width="1300" height="860" alt="report image" src="https://github.com/user-attachments/assets/00389c61-f440-4315-a3f3-1836bd9af734" />
 
 - System Configuration
-- <img width="1600" height="900" alt="system status and config" src="https://github.com/user-attachments/assets/dd1db25e-9d8d-46ba-b937-6ff341626269" />
+  <img width="1600" height="900" alt="system status and config" src="https://github.com/user-attachments/assets/dd1db25e-9d8d-46ba-b937-6ff341626269" />
 
 
 ---
