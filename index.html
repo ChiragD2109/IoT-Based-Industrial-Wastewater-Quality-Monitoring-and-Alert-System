@@ -52,6 +52,10 @@
             <span class="status-dot"></span>
             <span class="status-text">Disconnected</span>
           </div>
+          <div id="hardware-status" class="status-badge status-offline">
+            <span class="status-dot"></span>
+            <span class="status-text">Sys Offline</span>
+          </div>
           <div class="refresh-countdown">
             <i class="fa-solid fa-arrows-rotate spinner-icon" id="refresh-icon"></i>
             <span id="countdown-timer">15s</span>
@@ -106,7 +110,7 @@
           </ul>
         </nav>
         <div class="sidebar-footer">
-          <p class="project-tag">VTU Capstone Project</p>
+          <p class="project-tag">made by batch 7</p>
           <p class="project-year">2026</p>
         </div>
       </aside>
@@ -227,8 +231,8 @@
                   <div class="indicator-bar" id="bar-turbidity" style="width: 20%;"></div>
                   <div class="indicator-markers">
                     <span>0</span>
-                    <span class="marker-safe">Safe (0-5)</span>
-                    <span>20+</span>
+                    <span class="marker-safe">Safe (0-100)</span>
+                    <span>200+</span>
                   </div>
                 </div>
               </div>
@@ -259,7 +263,7 @@
                   <div class="indicator-bar" id="bar-temperature" style="width: 45%;"></div>
                   <div class="indicator-markers">
                     <span>0</span>
-                    <span class="marker-safe">Safe (20-35)</span>
+                    <span class="marker-safe">Safe (&le;35)</span>
                     <span>60</span>
                   </div>
                 </div>
@@ -388,6 +392,17 @@
                 <canvas id="chart-temp-canvas"></canvas>
               </div>
             </div>
+
+            <!-- Status Chart -->
+            <div class="chart-card wide-card">
+              <div class="chart-header">
+                <h4>System Status Trend</h4>
+                <span class="chart-tag status-tag">Status</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="chart-status-canvas"></canvas>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -447,7 +462,7 @@
           <div class="print-header-only">
             <div class="print-logo-area">
               <h2>AI-Powered IoT Industrial Wastewater Quality Monitoring</h2>
-              <p>VTU Capstone Engineering Project &copy; 2026</p>
+              <p>made by batch 7 &copy; 2026</p>
             </div>
             <hr>
             <h3>Industrial Effluent Audit Report</h3>
@@ -575,16 +590,7 @@
                   <input type="password" id="input-api-key" placeholder="Enter API Key" required>
                 </div>
                 
-                <div class="form-toggle-group">
-                  <label class="toggle-switch">
-                    <input type="checkbox" id="toggle-demo-mode">
-                    <span class="slider"></span>
-                  </label>
-                  <div class="toggle-label-text">
-                    <strong>Demo Simulation Mode</strong>
-                    <p>Uses realistic fluctuating mock data. Ideal for presentation if cloud connection is unavailable.</p>
-                  </div>
-                </div>
+                <!-- Demo Mode disabled to enforce live Cloud integration only -->
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save & Connect</button>

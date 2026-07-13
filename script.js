@@ -3,11 +3,17 @@
    ========================================================================== */
 
 // 1. CONFIGURATION & STATE
+// Clean up legacy channel defaults to prevent browser cache from using old mockup credentials
+if (localStorage.getItem("ts_channel_id") === "123456" || localStorage.getItem("ts_channel_id") === null) {
+  localStorage.setItem("ts_channel_id", "3408255");
+  localStorage.setItem("ts_read_api_key", "");
+}
+
 let CONFIG = {
-  channelId: localStorage.getItem("ts_channel_id") || "123456",
-  readApiKey: localStorage.getItem("ts_read_api_key") || "DEMOKEY123",
-  isDemoMode: localStorage.getItem("ts_demo_mode") === "false" ? false : true,
-  refreshInterval: 15000
+  channelId: localStorage.getItem("ts_channel_id"),
+  readApiKey: localStorage.getItem("ts_read_api_key") || "",
+  isDemoMode: false, // Bypassed/disabled to enforce live cloud integration only
+  refreshInterval: 20000
 };
 
 let state = {
@@ -15,16 +21,16 @@ let state = {
   latestFeed: null,
   alerts: [],
   isAudioOn: true,
-  countdown: 15,
+  countdown: 20,
   refreshTimerId: null,
   charts: {}
 };
 
 const THRESHOLDS = {
-  ph: { minSafe: 6.5, maxSafe: 8.5, minWarn: 5.5, maxWarn: 9.5 },
-  tds: { safe: 500, warn: 1000 },
-  turbidity: { safe: 5, warn: 10 },
-  temperature: { minSafe: 20, maxSafe: 35, minWarn: 15, maxWarn: 45 }
+  ph: { minSafe: 6.5, maxSafe: 8.5 },
+  tds: { safe: 500 },
+  turbidity: { safe: 100 },
+  temperature: { safe: 35 }
 };
 
 // DOM ELEMENTS
@@ -108,12 +114,12 @@ const DOM = {
   configForm: document.getElementById("thingspeak-config-form"),
   inputChannelId: document.getElementById("input-channel-id"),
   inputApiKey: document.getElementById("input-api-key"),
-  toggleDemoMode: document.getElementById("toggle-demo-mode"),
   btnLoadDefaultPublic: document.getElementById("btn-load-default-public"),
   statusSensorPh: document.getElementById("status-sensor-ph"),
   statusSensorTds: document.getElementById("status-sensor-tds"),
   statusSensorTurbidity: document.getElementById("status-sensor-turbidity"),
-  statusSensorTemp: document.getElementById("status-sensor-temp")
+  statusSensorTemp: document.getElementById("status-sensor-temp"),
+  hardwareStatus: document.getElementById("hardware-status")
 };
 
 // ==========================================================================
@@ -169,27 +175,8 @@ function parseVal(val, decimals = 2) {
   return isNaN(num) ? null : parseFloat(num.toFixed(decimals));
 }
 
-function generateMockReading(prev = {}) {
-  let ph = prev.ph ? prev.ph + (Math.random() - 0.5) * 0.4 : 7.2 + (Math.random() - 0.5) * 1.5;
-  ph = Math.max(2, Math.min(12, ph));
+// Mock generation removed to enforce live API usage
 
-  let tds = prev.tds ? prev.tds + Math.floor((Math.random() - 0.4) * 80) : 420 + Math.floor((Math.random() - 0.5) * 400);
-  tds = Math.max(10, Math.min(1800, tds));
-
-  let turb = prev.turbidity ? prev.turbidity + (Math.random() - 0.45) * 1.5 : 3.4 + (Math.random() - 0.5) * 8;
-  turb = Math.max(0.1, Math.min(25, turb));
-
-  let temp = prev.temperature ? prev.temperature + (Math.random() - 0.5) * 0.6 : 26.5 + (Math.random() - 0.5) * 10;
-  temp = Math.max(10, Math.min(55, temp));
-
-  return {
-    created_at: new Date().toISOString(),
-    field1: ph.toFixed(2),
-    field2: tds.toFixed(0),
-    field3: turb.toFixed(2),
-    field4: temp.toFixed(1)
-  };
-}
 
 // ==========================================================================
 // 3. STATUS CRITERIA & WQI ALGORITHMS
@@ -199,11 +186,8 @@ function getPhStatus(val) {
   if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
   if (val >= THRESHOLDS.ph.minSafe && val <= THRESHOLDS.ph.maxSafe) {
     return { text: "🟢 Safe", class: "badge-safe", code: "info" };
-  } else if ((val >= THRESHOLDS.ph.minWarn && val < THRESHOLDS.ph.minSafe) || 
-             (val > THRESHOLDS.ph.maxSafe && val <= THRESHOLDS.ph.maxWarn)) {
-    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
-    return { text: "🔴 Critical", class: "badge-critical", code: "critical" };
+    return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
@@ -211,10 +195,8 @@ function getTdsStatus(val) {
   if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
   if (val <= THRESHOLDS.tds.safe) {
     return { text: "🟢 Safe", class: "badge-safe", code: "info" };
-  } else if (val <= THRESHOLDS.tds.warn) {
-    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
-    return { text: "🔴 Critical", class: "badge-critical", code: "critical" };
+    return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
@@ -222,22 +204,17 @@ function getTurbidityStatus(val) {
   if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
   if (val <= THRESHOLDS.turbidity.safe) {
     return { text: "🟢 Safe", class: "badge-safe", code: "info" };
-  } else if (val <= THRESHOLDS.turbidity.warn) {
-    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
-    return { text: "🔴 Critical", class: "badge-critical", code: "critical" };
+    return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
 function getTemperatureStatus(val) {
   if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
-  if (val >= THRESHOLDS.temperature.minSafe && val <= THRESHOLDS.temperature.maxSafe) {
+  if (val <= THRESHOLDS.temperature.safe) {
     return { text: "🟢 Safe", class: "badge-safe", code: "info" };
-  } else if ((val >= THRESHOLDS.temperature.minWarn && val < THRESHOLDS.temperature.minSafe) || 
-             (val > THRESHOLDS.temperature.maxSafe && val <= THRESHOLDS.temperature.maxWarn)) {
-    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
-    return { text: "🔴 Critical", class: "badge-critical", code: "critical" };
+    return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
@@ -346,7 +323,8 @@ function initCharts() {
     { id: "chart-ph-canvas", label: "pH Level", color: "#A855F7", border: "#A855F7" },
     { id: "chart-tds-canvas", label: "TDS (ppm)", color: "#00E5FF", border: "#00E5FF" },
     { id: "chart-turbidity-canvas", label: "Turbidity (NTU)", color: "#F59E0B", border: "#F59E0B" },
-    { id: "chart-temp-canvas", label: "Temperature (°C)", color: "#EF4444", border: "#EF4444" }
+    { id: "chart-temp-canvas", label: "Temperature (°C)", color: "#EF4444", border: "#EF4444" },
+    { id: "chart-status-canvas", label: "System Status (0=SAFE, 1=UNSAFE)", color: "#6366F1", border: "#6366F1", isStatus: true }
   ];
 
   chartConfigs.forEach(cfg => {
@@ -355,6 +333,18 @@ function initCharts() {
     const fillGrd = ctx.createLinearGradient(0, 0, 0, 180);
     fillGrd.addColorStop(0, cfg.color + "20");
     fillGrd.addColorStop(1, cfg.color + "00");
+
+    let yTicksConfig = { font: { size: 9 }, color: '#94A3B8' };
+    if (cfg.isStatus) {
+      yTicksConfig.stepSize = 1;
+      yTicksConfig.min = 0;
+      yTicksConfig.max = 1;
+      yTicksConfig.callback = function(value) {
+        if (value === 0) return "SAFE";
+        if (value === 1) return "UNSAFE";
+        return "";
+      };
+    }
 
     state.charts[cfg.id] = new Chart(ctx, {
       type: "line",
@@ -387,7 +377,15 @@ function initCharts() {
             titleFont: { family: 'Outfit', weight: 'bold', size: 11 },
             bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
             titleColor: '#ffffff',
-            bodyColor: '#94A3B8'
+            bodyColor: '#94A3B8',
+            callbacks: cfg.isStatus ? {
+              label: function(context) {
+                let val = context.raw;
+                if (val === 0) return "Status: SAFE";
+                if (val === 1) return "Status: UNSAFE";
+                return "Status: Unknown";
+              }
+            } : {}
           }
         },
         scales: {
@@ -397,7 +395,7 @@ function initCharts() {
           },
           y: {
             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { font: { size: 9 }, color: '#94A3B8' }
+            ticks: yTicksConfig
           }
         }
       }
@@ -416,6 +414,7 @@ function updateChartsData(feeds) {
   const tdsData = sortedFeeds.map(f => parseVal(f.field2, 0));
   const turbData = sortedFeeds.map(f => parseVal(f.field3));
   const tempData = sortedFeeds.map(f => parseVal(f.field4));
+  const statusData = sortedFeeds.map(f => parseVal(f.field5, 0));
 
   if (state.charts["chart-ph-canvas"]) {
     state.charts["chart-ph-canvas"].data.labels = labels;
@@ -436,6 +435,11 @@ function updateChartsData(feeds) {
     state.charts["chart-temp-canvas"].data.labels = labels;
     state.charts["chart-temp-canvas"].data.datasets[0].data = tempData;
     state.charts["chart-temp-canvas"].update();
+  }
+  if (state.charts["chart-status-canvas"]) {
+    state.charts["chart-status-canvas"].data.labels = labels;
+    state.charts["chart-status-canvas"].data.datasets[0].data = statusData;
+    state.charts["chart-status-canvas"].update();
   }
 }
 
@@ -543,8 +547,8 @@ DOM.filterBtns.forEach(btn => {
   });
 });
 
-function evaluateThresholds(ph, tds, turb, temp) {
-  let hasCritical = false;
+function evaluateThresholds(ph, tds, turb, temp, hwStatus) {
+  let hasCritical = (hwStatus === 1);
   let phState = getPhStatus(ph);
   let tdsState = getTdsStatus(tds);
   let turbState = getTurbidityStatus(turb);
@@ -552,36 +556,33 @@ function evaluateThresholds(ph, tds, turb, temp) {
 
   DOM.criticalAlertBanner.classList.add("hidden");
 
+  // Hardware status check (Field 5: 1 = UNSAFE, 0 = SAFE)
+  if (hwStatus === 1) {
+    pushAlert("Sys Unsafe Alert", "Factory hardware reported UNSAFE discharge status (Field 5 = 1).", "critical");
+  }
+
   // pH checks
   if (phState.code === 'critical') {
     pushAlert("Critical pH Breach", `Acidic discharge breach: pH registered at ${ph} pH. Lock outflow gate.`, "critical");
     hasCritical = true;
-  } else if (phState.code === 'warning') {
-    pushAlert("pH Level Warning", `pH level shifted to ${ph} pH. Check neutralizer reserves.`, "warning");
   }
 
   // TDS checks
   if (tdsState.code === 'critical') {
     pushAlert("Critical TDS Breach", `Extremely high TDS levels logged at ${tds} ppm. Recycle loop active.`, "critical");
     hasCritical = true;
-  } else if (tdsState.code === 'warning') {
-    pushAlert("TDS Level Warning", `Dissolved mineral solids at ${tds} ppm. Monitor water softeners.`, "warning");
   }
 
   // Turbidity checks
   if (turbState.code === 'critical') {
     pushAlert("Critical Turbidity Breach", `Effluent turbidity registered a high ${turb} NTU. Divert to clarifiers.`, "critical");
     hasCritical = true;
-  } else if (turbState.code === 'warning') {
-    pushAlert("Turbidity Warning", `Water clarity warnings: Turbidity rose to ${turb} NTU. Clean screen mesh.`, "warning");
   }
 
   // Temp checks
   if (tempState.code === 'critical') {
-    pushAlert("Critical Temp Breach", `Wastewater temperature rose to thermal hazard limit: ${temp}°C. cooling active.`, "critical");
+    pushAlert("Critical Temp Breach", `Wastewater temperature rose to thermal hazard limit: ${temp}°C. Cooling active.`, "critical");
     hasCritical = true;
-  } else if (tempState.code === 'warning') {
-    pushAlert("Temperature Warning", `Effluent heat logs at warning ${temp}°C. Monitor cooling tower fans.`, "warning");
   }
 
   if (hasCritical) {
@@ -645,9 +646,10 @@ function renderRawDataTable(feeds) {
     const tds = parseVal(f.field2, 0);
     const turb = parseVal(f.field3);
     const temp = parseVal(f.field4);
+    const hwStatus = parseVal(f.field5, 0);
     
-    const wqi = calculateWQI(ph, tds, turb, temp);
-    const rating = getWqiClassification(wqi).label;
+    const statusText = hwStatus === 0 ? "SAFE" : (hwStatus === 1 ? "UNSAFE" : "--");
+    const statusClass = hwStatus === 0 ? "badge-safe" : (hwStatus === 1 ? "badge-critical" : "status-offline");
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -656,7 +658,7 @@ function renderRawDataTable(feeds) {
       <td>${tds !== null ? tds : '--'}</td>
       <td>${turb !== null ? turb : '--'}</td>
       <td>${temp !== null ? temp : '--'} °C</td>
-      <td><span class="status-badge-mini ${wqi >= 70 ? 'badge-safe' : (wqi >= 50 ? 'badge-warning' : 'badge-critical')}">${rating}</span></td>
+      <td><span class="status-badge-mini ${statusClass}">${statusText}</span></td>
     `;
     DOM.rawDataBody.appendChild(row);
   });
@@ -676,8 +678,9 @@ DOM.btnExportCsv.addEventListener("click", () => {
     const tds = parseVal(f.field2, 0) || "";
     const turb = parseVal(f.field3) || "";
     const temp = parseVal(f.field4) || "";
+    const hwStatus = parseVal(f.field5, 0);
     const wqi = calculateWQI(ph, tds, turb, temp) || "";
-    const status = getWqiClassification(wqi).label;
+    const status = hwStatus === 0 ? "SAFE" : (hwStatus === 1 ? "UNSAFE" : "");
 
     csvContent += `"${f.created_at}","${ph}","${tds}","${turb}","${temp}","${wqi}","${status}"\r\n`;
   });
@@ -707,12 +710,12 @@ DOM.btnPrintReport.addEventListener("click", () => {
 async function fetchThingSpeakData() {
   DOM.refreshIcon.classList.add("loading");
   
-  if (CONFIG.isDemoMode) {
-    simulateDataFetch();
-    return;
+  let url = `https://api.thingspeak.com/channels/${CONFIG.channelId}/feeds.json?results=100`;
+  if (CONFIG.readApiKey && CONFIG.readApiKey.trim() !== "") {
+    url += `&api_key=${CONFIG.readApiKey.trim()}`;
   }
 
-  const url = `https://api.thingspeak.com/channels/${CONFIG.channelId}/feeds.json?api_key=${CONFIG.readApiKey}&results=50`;
+  console.log(`[ThingSpeak API Request] Fetching data from: ${url}`);
 
   try {
     const response = await fetch(url);
@@ -721,51 +724,35 @@ async function fetchThingSpeakData() {
     }
     const data = await response.json();
     
-    if (data && data.feeds) {
+    console.log("[ThingSpeak API Response] Raw payload received:", data);
+    
+    if (data && data.feeds && data.feeds.length > 0) {
       processFetchedFeeds(data.feeds);
       updateConnectionStatus(true);
     } else {
-      throw new Error("Empty or invalid data fields received.");
+      throw new Error("Empty or invalid data feeds array received.");
     }
   } catch (error) {
-    console.error("ThingSpeak Connection Error:", error);
+    console.error("[ThingSpeak API Error] Connection failed:", error);
     updateConnectionStatus(false, error.message);
-    pushAlert("ThingSpeak Connection Fail", `Channel ${CONFIG.channelId} unreachable. Activating simulated fallback engine.`, "warning");
-    simulateDataFetch();
+    pushAlert("ThingSpeak Connection Fail", `Channel ${CONFIG.channelId} unreachable: ${error.message}`, "critical");
+    
+    // Maintain last successfully received data if request fails
+    if (state.feeds && state.feeds.length > 0) {
+      processFetchedFeeds(state.feeds);
+    }
   } finally {
     DOM.refreshIcon.classList.remove("loading");
   }
 }
 
-function simulateDataFetch() {
-  updateConnectionStatus(true, "Simulated");
-
-  if (state.feeds.length === 0) {
-    let mockList = [];
-    let currentMock = generateMockReading();
-    mockList.push(currentMock);
-    
-    for (let i = 1; i < 50; i++) {
-      let timeOffset = new Date(new Date().getTime() - i * 60 * 1000);
-      let stepMock = generateMockReading(currentMock);
-      stepMock.created_at = timeOffset.toISOString();
-      mockList.push(stepMock);
-      currentMock = stepMock;
-    }
-    state.feeds = mockList;
-  } else {
-    let lastMock = state.feeds[0];
-    let nextMock = generateMockReading(lastMock);
-    state.feeds.unshift(nextMock);
-    if (state.feeds.length > 50) {
-      state.feeds.pop();
-    }
+function processFetchedFeeds(feeds) {
+  // Ensure the feeds are ordered latest first (index 0 is latest feed).
+  // Live feeds from ThingSpeak are returned oldest-first, so we reverse them.
+  if (feeds.length > 1 && new Date(feeds[0].created_at) < new Date(feeds[feeds.length - 1].created_at)) {
+    feeds.reverse();
   }
 
-  processFetchedFeeds(state.feeds);
-}
-
-function processFetchedFeeds(feeds) {
   state.feeds = feeds;
   state.latestFeed = feeds[0];
 
@@ -773,6 +760,16 @@ function processFetchedFeeds(feeds) {
   const tds = parseVal(state.latestFeed.field2, 0);
   const turb = parseVal(state.latestFeed.field3);
   const temp = parseVal(state.latestFeed.field4);
+  const hwStatus = parseVal(state.latestFeed.field5, 0); // 0 = SAFE, 1 = UNSAFE
+
+  console.log("[Parsed Sensor Values] Latest reading:", {
+    timestamp: state.latestFeed.created_at,
+    pH: ph,
+    TDS: tds,
+    Turbidity: turb,
+    Temperature: temp,
+    Status: hwStatus
+  });
 
   DOM.valPh.innerText = ph !== null ? ph : "--";
   DOM.valTds.innerText = tds !== null ? tds : "--";
@@ -789,27 +786,54 @@ function processFetchedFeeds(feeds) {
   DOM.badgePh.innerText = phStatus.text;
   DOM.badgePh.className = `status-badge-mini ${phStatus.class}`;
   DOM.barPh.style.width = ph !== null ? `${(ph / 14) * 100}%` : "0%";
-  DOM.barPh.style.backgroundColor = phStatus.code === 'critical' ? 'var(--danger)' : (phStatus.code === 'warning' ? 'var(--warning)' : 'var(--success)');
+  DOM.barPh.style.backgroundColor = phStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
 
   const tdsStatus = getTdsStatus(tds);
   DOM.badgeTds.innerText = tdsStatus.text;
   DOM.badgeTds.className = `status-badge-mini ${tdsStatus.class}`;
-  DOM.barTds.style.width = tds !== null ? `${Math.min(100, (tds / 1200) * 100)}%` : "0%";
-  DOM.barTds.style.backgroundColor = tdsStatus.code === 'critical' ? 'var(--danger)' : (tdsStatus.code === 'warning' ? 'var(--warning)' : 'var(--success)');
+  DOM.barTds.style.width = tds !== null ? `${Math.min(100, (tds / 1000) * 100)}%` : "0%";
+  DOM.barTds.style.backgroundColor = tdsStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
 
   const turbStatus = getTurbidityStatus(turb);
   DOM.badgeTurbidity.innerText = turbStatus.text;
   DOM.badgeTurbidity.className = `status-badge-mini ${turbStatus.class}`;
-  DOM.barTurbidity.style.width = turb !== null ? `${Math.min(100, (turb / 18) * 100)}%` : "0%";
-  DOM.barTurbidity.style.backgroundColor = turbStatus.code === 'critical' ? 'var(--danger)' : (turbStatus.code === 'warning' ? 'var(--warning)' : 'var(--success)');
+  DOM.barTurbidity.style.width = turb !== null ? `${Math.min(100, (turb / 200) * 100)}%` : "0%";
+  DOM.barTurbidity.style.backgroundColor = turbStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
 
   const tempStatus = getTemperatureStatus(temp);
   DOM.badgeTemperature.innerText = tempStatus.text;
   DOM.badgeTemperature.className = `status-badge-mini ${tempStatus.class}`;
-  DOM.barTemperature.style.width = temp !== null ? `${Math.min(100, (temp / 55) * 100)}%` : "0%";
-  DOM.barTemperature.style.backgroundColor = tempStatus.code === 'critical' ? 'var(--danger)' : (tempStatus.code === 'warning' ? 'var(--warning)' : 'var(--success)');
+  DOM.barTemperature.style.width = temp !== null ? `${Math.min(100, (temp / 60) * 100)}%` : "0%";
+  DOM.barTemperature.style.backgroundColor = tempStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
 
-  evaluateThresholds(ph, tds, turb, temp);
+  evaluateThresholds(ph, tds, turb, temp, hwStatus);
+
+  // Update overall water quality status card badge based strictly on hwStatus (Field 5)
+  if (hwStatus === 0) {
+    DOM.wqiStatusBadge.innerText = "SAFE";
+    DOM.wqiStatusBadge.className = "wqi-status-badge-large wqi-excellent";
+    DOM.wqiStatusText.innerText = "Effluent complies with safe environment discharging standards.";
+  } else if (hwStatus === 1) {
+    DOM.wqiStatusBadge.innerText = "UNSAFE";
+    DOM.wqiStatusBadge.className = "wqi-status-badge-large wqi-critical";
+    DOM.wqiStatusText.innerText = "CRITICAL: Factory hardware reported UNSAFE water quality limits.";
+  } else {
+    DOM.wqiStatusBadge.innerText = "UNKNOWN";
+    DOM.wqiStatusBadge.className = "wqi-status-badge-large wqi-moderate";
+    DOM.wqiStatusText.innerText = "Waiting for telemetry updates...";
+  }
+
+  // Update hardware status badge in header based on hwStatus
+  if (hwStatus === 1) {
+    DOM.hardwareStatus.className = "status-badge status-danger";
+    DOM.hardwareStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Sys Unsafe</span>';
+  } else if (hwStatus === 0) {
+    DOM.hardwareStatus.className = "status-badge status-online";
+    DOM.hardwareStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Sys Safe</span>';
+  } else {
+    DOM.hardwareStatus.className = "status-badge status-offline";
+    DOM.hardwareStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Sys Offline</span>';
+  }
 
   const wqi = calculateWQI(ph, tds, turb, temp);
   DOM.wqiScoreNumber.innerText = wqi !== null ? wqi : "--";
@@ -817,11 +841,6 @@ function processFetchedFeeds(feeds) {
   if (wqi !== null) {
     const offset = 125.6 - (wqi / 100) * 125.6;
     DOM.wqiGaugePath.style.strokeDashoffset = offset;
-    
-    const wqiEval = getWqiClassification(wqi);
-    DOM.wqiStatusBadge.innerText = wqiEval.label;
-    DOM.wqiStatusBadge.className = `wqi-status-badge-large ${wqiEval.class}`;
-    DOM.wqiStatusText.innerText = wqiEval.text;
   }
 
   const aiResult = runAIInference(ph, tds, turb, temp);
@@ -859,22 +878,19 @@ function updateSensorDiagnostics(ph, tds, turb, temp) {
 
 function updateConnectionStatus(isOnline, modeInfo = "") {
   if (isOnline) {
-    if (modeInfo === "Simulated") {
-      DOM.connectionStatus.className = "status-badge status-simulation";
-      DOM.connectionStatus.querySelector(".status-text").innerText = "Simulated";
-      DOM.dataModeBadge.className = "badge-mode mode-demo";
-      DOM.dataModeBadge.innerText = "SIMULATED";
-    } else {
-      DOM.connectionStatus.className = "status-badge status-online";
-      DOM.connectionStatus.querySelector(".status-text").innerText = "Cloud Online";
-      DOM.dataModeBadge.className = "badge-mode mode-live";
-      DOM.dataModeBadge.innerText = "LIVE CLOUD";
-    }
+    DOM.connectionStatus.className = "status-badge status-online";
+    DOM.connectionStatus.querySelector(".status-text").innerText = "Cloud Online";
+    DOM.dataModeBadge.className = "badge-mode mode-live";
+    DOM.dataModeBadge.innerText = "LIVE CLOUD";
   } else {
     DOM.connectionStatus.className = "status-badge status-offline";
     DOM.connectionStatus.querySelector(".status-text").innerText = "Cloud Error";
     DOM.dataModeBadge.className = "badge-mode mode-demo";
     DOM.dataModeBadge.innerText = "OFFLINE FALLBACK";
+    
+    // Set hardware/system status to offline since connection failed
+    DOM.hardwareStatus.className = "status-badge status-offline";
+    DOM.hardwareStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Sys Offline</span>';
   }
 }
 
@@ -883,7 +899,7 @@ function startTimerLoop() {
     clearInterval(state.refreshTimerId);
   }
 
-  state.countdown = 15;
+  state.countdown = 20;
   DOM.countdownTimer.innerText = `${state.countdown}s`;
 
   state.refreshTimerId = setInterval(() => {
@@ -892,7 +908,7 @@ function startTimerLoop() {
 
     if (state.countdown <= 0) {
       fetchThingSpeakData();
-      state.countdown = 15;
+      state.countdown = 20;
     }
   }, 1000);
 }
@@ -909,7 +925,6 @@ DOM.triggerRefreshBtn.addEventListener("click", () => {
 function loadConfigIntoForm() {
   DOM.inputChannelId.value = CONFIG.channelId;
   DOM.inputApiKey.value = CONFIG.readApiKey;
-  DOM.toggleDemoMode.checked = CONFIG.isDemoMode;
 }
 
 DOM.configForm.addEventListener("submit", (e) => {
@@ -917,13 +932,11 @@ DOM.configForm.addEventListener("submit", (e) => {
   
   CONFIG.channelId = DOM.inputChannelId.value.trim();
   CONFIG.readApiKey = DOM.inputApiKey.value.trim();
-  CONFIG.isDemoMode = DOM.toggleDemoMode.checked;
 
   localStorage.setItem("ts_channel_id", CONFIG.channelId);
   localStorage.setItem("ts_read_api_key", CONFIG.readApiKey);
-  localStorage.setItem("ts_demo_mode", CONFIG.isDemoMode);
 
-  pushAlert("Config Sync", `Bound dashboard parameters to Channel ${CONFIG.channelId}. Mode: ${CONFIG.isDemoMode ? 'Simulated' : 'Cloud Connect'}.`, "info");
+  pushAlert("Config Sync", `Bound dashboard parameters to Channel ${CONFIG.channelId}.`, "info");
   
   DOM.loadingOverlay.classList.remove("hidden");
   fetchThingSpeakData().then(() => {
@@ -936,9 +949,8 @@ DOM.configForm.addEventListener("submit", (e) => {
 });
 
 DOM.btnLoadDefaultPublic.addEventListener("click", () => {
-  DOM.inputChannelId.value = "12397";
+  DOM.inputChannelId.value = "3408255";
   DOM.inputApiKey.value = ""; 
-  DOM.toggleDemoMode.checked = false;
   DOM.configForm.dispatchEvent(new Event("submit"));
 });
 
