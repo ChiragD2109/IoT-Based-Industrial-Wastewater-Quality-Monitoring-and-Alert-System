@@ -891,20 +891,8 @@ function processFetchedFeeds(feeds) {
 }
 
 function updateSensorDiagnostics(ph, tds, turb, temp) {
-  const toggleDiagBadge = (el, status) => {
-    if (status) {
-      el.className = "status-indicator online";
-      el.innerHTML = '<i class="fa-solid fa-circle"></i> Online';
-    } else {
-      el.className = "status-indicator offline";
-      el.innerHTML = '<i class="fa-solid fa-circle"></i> Offline';
-    }
-  };
-
-  toggleDiagBadge(DOM.statusSensorPh, ph !== null);
-  toggleDiagBadge(DOM.statusSensorTds, tds !== null);
-  toggleDiagBadge(DOM.statusSensorTurbidity, turb !== null);
-  toggleDiagBadge(DOM.statusSensorTemp, temp !== null);
+  // Sensor hardware description card displays static sensor specifications;
+  // online/offline diagnostics display removed as per user requirements.
 }
 
 function updateConnectionStatus(isOnline, modeInfo = "") {

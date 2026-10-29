@@ -1837,6 +1837,23 @@ html, body {
 .status-indicator.online { color: var(--status-healthy); }
 .status-indicator.offline { color: var(--status-critical); }
 
+.sensor-tag {
+  background: var(--bg-blue-subtle);
+  color: var(--blue-deep);
+  border: 1px solid var(--blue-border);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.sensor-desc-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 4px 0 6px;
+}
+
 .diag-meta {
   display: flex;
   justify-content: space-between;

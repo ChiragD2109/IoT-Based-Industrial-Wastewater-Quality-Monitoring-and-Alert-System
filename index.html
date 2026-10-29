@@ -688,13 +688,13 @@
               </form>
             </div>
 
-            <!-- Hardware Diagnostic Card -->
+            <!-- Hardware Sensors Used Card -->
             <div class="config-card">
               <div class="config-card-header">
                 <i class="fa-solid fa-microchip"></i>
                 <div>
-                  <h3>Hardware Nodes Diagnostics</h3>
-                  <p class="config-desc">Real-time health check of individual physical probes based on incoming feed payloads.</p>
+                  <h3>Hardware Sensors Used</h3>
+                  <p class="config-desc">Physical sensors integrated with the ESP32 microcontroller and their operational functions.</p>
                 </div>
               </div>
               
@@ -702,9 +702,10 @@
                 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-flask-vial"></i> Analog pH Glass Probe</span>
-                    <span class="status-indicator online" id="status-sensor-ph"><i class="fa-solid fa-circle"></i> Online</span>
+                    <span class="sensor-title"><i class="fa-solid fa-flask-vial"></i> pH Sensor</span>
+                    <span class="sensor-tag">Analog Probe</span>
                   </div>
+                  <p class="sensor-desc-text">Measures the hydrogen-ion concentration (acidity or alkalinity) of wastewater to ensure effluent remains within the safe 6.5 – 8.5 pH regulatory discharge range.</p>
                   <div class="diag-meta">
                     <span>Field: <code>field1</code></span>
                     <span>Pinout: GPIO 34 (ADC1_CH6)</span>
@@ -713,9 +714,10 @@
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-filter"></i> Analog TDS Conductivity Probe</span>
-                    <span class="status-indicator online" id="status-sensor-tds"><i class="fa-solid fa-circle"></i> Online</span>
+                    <span class="sensor-title"><i class="fa-solid fa-filter"></i> TDS Sensor</span>
+                    <span class="sensor-tag">Analog Probe</span>
                   </div>
+                  <p class="sensor-desc-text">Measures dissolved minerals, inorganic salts, and electrical conductivity in parts per million (ppm) to evaluate water mineralization and purity.</p>
                   <div class="diag-meta">
                     <span>Field: <code>field2</code></span>
                     <span>Pinout: GPIO 35 (ADC1_CH7)</span>
@@ -724,9 +726,10 @@
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-smog"></i> Optoelectronic Turbidity Sensor</span>
-                    <span class="status-indicator online" id="status-sensor-turbidity"><i class="fa-solid fa-circle"></i> Online</span>
+                    <span class="sensor-title"><i class="fa-solid fa-smog"></i> Turbidity Sensor</span>
+                    <span class="sensor-tag">Optoelectronic</span>
                   </div>
+                  <p class="sensor-desc-text">Uses optical light transmittance and scattering to quantify suspended solid particles and cloudiness in the effluent (measured in NTU).</p>
                   <div class="diag-meta">
                     <span>Field: <code>field3</code></span>
                     <span>Pinout: GPIO 32 (ADC1_CH4)</span>
@@ -735,9 +738,10 @@
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-thermometer"></i> DS18B20 Digital Temp Sensor</span>
-                    <span class="status-indicator online" id="status-sensor-temp"><i class="fa-solid fa-circle"></i> Online</span>
+                    <span class="sensor-title"><i class="fa-solid fa-thermometer"></i> Temperature Sensor</span>
+                    <span class="sensor-tag">Digital 1-Wire</span>
                   </div>
+                  <p class="sensor-desc-text">Monitors wastewater temperature (using a waterproof DS18B20 probe) to prevent thermal pollution and protect aquatic ecosystems from hot industrial discharge.</p>
                   <div class="diag-meta">
                     <span>Field: <code>field4</code></span>
                     <span>Pinout: GPIO 4 (1-Wire Bus)</span>
