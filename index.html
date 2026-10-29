@@ -4,16 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IoT-Based Industrial Wastewater Quality Monitoring and Alert System</title>
-  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <!-- Google Fonts: Space Grotesk & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <!-- Theme Init: Prevent white flash before render -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem("app_theme") || "system";
+      const isDark = (saved === "dark") || (saved === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+    })();
+  </script>
 </head>
 <body>
   
@@ -42,9 +50,9 @@
           <div class="logo-text">
             <div class="logo-title-row">
               <h1>Industrial Wastewater Monitoring</h1>
-              <span class="facility-badge"><i class="fa-solid fa-industry"></i> ETP Unit #01</span>
+              <span class="facility-badge"><i class="fa-solid fa-shield-halved"></i> QualityGuard</span>
             </div>
-            <span class="sub-title">Automated Effluent Quality Assurance & Environmental Compliance Platform</span>
+            <span class="sub-title">Smart Water Quality. Real-Time Insights.</span>
           </div>
         </div>
       </div>
@@ -66,6 +74,22 @@
           </div>
         </div>
         
+        <!-- Theme Mode Selection Bar -->
+        <div class="theme-selector-bar" role="group" aria-label="Theme Selection" title="Display Theme">
+          <button type="button" class="theme-btn" data-theme-val="light" title="Light Mode">
+            <i class="fa-solid fa-sun"></i>
+            <span>Light</span>
+          </button>
+          <button type="button" class="theme-btn" data-theme-val="dark" title="Dark Mode">
+            <i class="fa-solid fa-moon"></i>
+            <span>Dark</span>
+          </button>
+          <button type="button" class="theme-btn" data-theme-val="system" title="System Default">
+            <i class="fa-solid fa-desktop"></i>
+            <span>System</span>
+          </button>
+        </div>
+
         <!-- Live Clock -->
         <div class="live-clock" title="Current Telemetry Station Time">
           <i class="fa-regular fa-clock"></i>
@@ -345,7 +369,7 @@
                 <div class="wqi-visual-container">
                   <div class="wqi-gauge">
                     <svg viewBox="0 0 100 50" class="gauge-svg">
-                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round" />
+                      <path class="gauge-bg-track" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round" />
                       <path id="wqi-gauge-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#wqi-gradient)" stroke-dasharray="125.6" stroke-dashoffset="125.6" stroke-width="8" stroke-linecap="round" />
                       
                       <defs>
@@ -661,6 +685,36 @@
 
           <div class="config-grid">
             
+            <!-- Display Theme Preferences Card -->
+            <div class="config-card">
+              <div class="config-card-header">
+                <i class="fa-solid fa-palette"></i>
+                <div>
+                  <h3>Display & Interface Theme</h3>
+                  <p class="config-desc">Select your visual appearance preference across light, dark, and system auto-sync.</p>
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-top: 12px;">
+                <label>Theme Mode</label>
+                <div class="theme-selector-bar" role="group" aria-label="Theme Selection" style="width: fit-content; margin-top: 6px;">
+                  <button type="button" class="theme-btn" data-theme-val="light" title="Light Mode">
+                    <i class="fa-solid fa-sun"></i>
+                    <span>Light</span>
+                  </button>
+                  <button type="button" class="theme-btn" data-theme-val="dark" title="Dark Mode">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Dark</span>
+                  </button>
+                  <button type="button" class="theme-btn" data-theme-val="system" title="System Default">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>System Auto</span>
+                  </button>
+                </div>
+                <small style="color: var(--text-secondary); margin-top: 8px; display: block; font-size: 0.78rem;">System Auto dynamically follows your computer's OS theme setting.</small>
+              </div>
+            </div>
+
             <!-- Connection Setup Card -->
             <div class="config-card">
               <div class="config-card-header">

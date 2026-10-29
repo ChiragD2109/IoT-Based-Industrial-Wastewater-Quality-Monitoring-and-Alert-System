@@ -23,14 +23,18 @@ let state = {
   isAudioOn: true,
   countdown: 20,
   refreshTimerId: null,
-  charts: {}
+  charts: {},
+  hasReportedOffline: false,
+  hasLoggedInitialSafe: false,
+  lastParamStates: { ph: null, tds: null, turb: null, temp: null, hw: null },
+  currentFilter: "all"
 };
 
 const THRESHOLDS = {
-  ph: { minSafe: 6.5, maxSafe: 8.5 },
-  tds: { safe: 500 },
-  turbidity: { safe: 100 },
-  temperature: { safe: 35 }
+  ph: { minSafe: 6.5, maxSafe: 8.5, minWarning: 6.0, maxWarning: 9.0 },
+  tds: { safe: 350, warning: 500 },
+  turbidity: { safe: 50, warning: 100 },
+  temperature: { safe: 30, warning: 35 }
 };
 
 // DOM ELEMENTS
@@ -209,36 +213,44 @@ function parseVal(val, decimals = 2) {
 // ==========================================================================
 
 function getPhStatus(val) {
-  if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
+  if (val === null) return { text: "Offline", class: "status-offline", code: "offline" };
   if (val >= THRESHOLDS.ph.minSafe && val <= THRESHOLDS.ph.maxSafe) {
-    return { text: "🟢 Safe", class: "badge-safe", code: "info" };
+    return { text: "🟢 Safe", class: "badge-safe", code: "safe" };
+  } else if (val >= THRESHOLDS.ph.minWarning && val <= THRESHOLDS.ph.maxWarning) {
+    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
     return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
 function getTdsStatus(val) {
-  if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
+  if (val === null) return { text: "Offline", class: "status-offline", code: "offline" };
   if (val <= THRESHOLDS.tds.safe) {
-    return { text: "🟢 Safe", class: "badge-safe", code: "info" };
+    return { text: "🟢 Safe", class: "badge-safe", code: "safe" };
+  } else if (val <= THRESHOLDS.tds.warning) {
+    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
     return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
 function getTurbidityStatus(val) {
-  if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
+  if (val === null) return { text: "Offline", class: "status-offline", code: "offline" };
   if (val <= THRESHOLDS.turbidity.safe) {
-    return { text: "🟢 Safe", class: "badge-safe", code: "info" };
+    return { text: "🟢 Safe", class: "badge-safe", code: "safe" };
+  } else if (val <= THRESHOLDS.turbidity.warning) {
+    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
     return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
 }
 
 function getTemperatureStatus(val) {
-  if (val === null) return { text: "Offline", class: "status-offline", code: "info" };
+  if (val === null) return { text: "Offline", class: "status-offline", code: "offline" };
   if (val <= THRESHOLDS.temperature.safe) {
-    return { text: "🟢 Safe", class: "badge-safe", code: "info" };
+    return { text: "🟢 Safe", class: "badge-safe", code: "safe" };
+  } else if (val <= THRESHOLDS.temperature.warning) {
+    return { text: "🟡 Warning", class: "badge-warning", code: "warning" };
   } else {
     return { text: "🔴 Unsafe", class: "badge-critical", code: "critical" };
   }
@@ -318,14 +330,17 @@ function runAIInference(ph, tds, turb, temp) {
       recommendation: "Trigger automatic polymer flocculation block; check primary settling tank levels."
     };
   }
-  if (phStatus === 'warning' || tdsStatus === 'warning' || turbStatus === 'warning') {
+  if (phStatus === 'warning' || tdsStatus === 'warning' || turbStatus === 'warning' || tempStatus === 'warning') {
     return {
       classification: "Contaminated Effluent Deviation",
       confidence: `${confidenceVal - 4}%`,
       recommendation: "Increase mechanical filter scrubbing cycles; monitor buffer tanks."
     };
   }
-  if (phStatus === 'info' && tdsStatus === 'info' && turbStatus === 'info' && tempStatus === 'info') {
+  if ((phStatus === 'safe' || phStatus === 'info') &&
+      (tdsStatus === 'safe' || tdsStatus === 'info') &&
+      (turbStatus === 'safe' || turbStatus === 'info') &&
+      (tempStatus === 'safe' || tempStatus === 'info')) {
     return {
       classification: "Purified Water Standard",
       confidence: `${confidenceVal + 3}%`,
@@ -360,7 +375,7 @@ function initCharts() {
     fillGrd.addColorStop(0, cfg.color + "20");
     fillGrd.addColorStop(1, cfg.color + "02");
 
-    let yTicksConfig = { font: { family: "'Inter', sans-serif", size: 10 }, color: '#64748B' };
+    let yTicksConfig = { font: { family: "'Space Grotesk', sans-serif", size: 10 }, color: '#64748B' };
     if (cfg.isStatus) {
       yTicksConfig.stepSize = 1;
       yTicksConfig.min = 0;
@@ -402,8 +417,8 @@ function initCharts() {
             backgroundColor: '#FFFFFF',
             borderColor: '#E2E8F0',
             borderWidth: 1,
-            titleFont: { family: "'Inter', sans-serif", weight: '600', size: 11 },
-            bodyFont: { family: "'Inter', sans-serif", size: 11 },
+            titleFont: { family: "'Space Grotesk', sans-serif", weight: '600', size: 11 },
+            bodyFont: { family: "'Space Grotesk', sans-serif", size: 11 },
             titleColor: '#0F172A',
             bodyColor: '#475569',
             padding: 10,
@@ -422,7 +437,7 @@ function initCharts() {
         scales: {
           x: {
             grid: { color: '#F1F5F9' },
-            ticks: { maxTicksLimit: 6, font: { family: "'Inter', sans-serif", size: 10 }, color: '#64748B' }
+            ticks: { maxTicksLimit: 6, font: { family: "'Space Grotesk', sans-serif", size: 10 }, color: '#64748B' }
           },
           y: {
             grid: { color: '#F1F5F9' },
@@ -485,6 +500,11 @@ function playAlertSound() {
 }
 
 function pushAlert(title, text, severity) {
+  // Anti-spam safeguard: prevent duplicate consecutive alerts with identical title and text
+  if (state.alerts.length > 0 && state.alerts[0].title === title && state.alerts[0].text === text) {
+    return;
+  }
+
   const timestamp = new Date();
   const alertObj = { title, text, severity, time: timestamp.toLocaleTimeString() };
   
@@ -494,7 +514,7 @@ function pushAlert(title, text, severity) {
     state.alerts.pop();
   }
 
-  renderAlerts();
+  renderAlerts(state.currentFilter);
   updateAlertBadge();
 }
 
@@ -508,7 +528,7 @@ function updateAlertBadge() {
   }
 }
 
-function renderAlerts(filter = "all") {
+function renderAlerts(filter = state.currentFilter || "all") {
   DOM.alertsList.innerHTML = "";
   
   let filtered = state.alerts;
@@ -555,7 +575,7 @@ function renderAlerts(filter = "all") {
 
 DOM.clearAlertsBtn.addEventListener("click", () => {
   state.alerts = [];
-  renderAlerts();
+  renderAlerts(state.currentFilter);
   updateAlertBadge();
 });
 
@@ -574,7 +594,8 @@ DOM.filterBtns.forEach(btn => {
   btn.addEventListener("click", () => {
     DOM.filterBtns.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    renderAlerts(btn.dataset.filter);
+    state.currentFilter = btn.dataset.filter;
+    renderAlerts(state.currentFilter);
   });
 });
 
@@ -589,31 +610,81 @@ function evaluateThresholds(ph, tds, turb, temp, hwStatus) {
 
   // Hardware status check (Field 5: 1 = UNSAFE, 0 = SAFE)
   if (hwStatus === 1) {
-    pushAlert("Sys Unsafe Alert", "Factory hardware reported UNSAFE discharge status (Field 5 = 1).", "critical");
+    hasCritical = true;
+    if (state.lastParamStates.hw !== 1) {
+      pushAlert("Sys Unsafe Alert", "Factory hardware reported UNSAFE discharge status (Field 5 = 1).", "critical");
+    }
+  } else if (hwStatus === 0 && state.lastParamStates.hw === 1) {
+    pushAlert("Sys Restored Safe", "Factory hardware reported SAFE discharge status (Field 5 = 0).", "info");
   }
+  state.lastParamStates.hw = hwStatus;
 
-  // pH checks
+  // pH checks (Non-spamming transition alerts)
   if (phState.code === 'critical') {
-    pushAlert("Critical pH Breach", `Acidic discharge breach: pH registered at ${ph} pH. Lock outflow gate.`, "critical");
     hasCritical = true;
+    if (state.lastParamStates.ph !== 'critical') {
+      pushAlert("Critical pH Breach", `Acidic discharge breach: pH registered at ${ph} pH. Lock outflow gate.`, "critical");
+    }
+  } else if (phState.code === 'warning') {
+    if (state.lastParamStates.ph !== 'warning') {
+      pushAlert("pH Level Warning", `pH registered borderline value at ${ph} pH (Safe range: 6.5–8.5). Monitor chemical buffer.`, "warning");
+    }
+  } else if (phState.code === 'safe' && state.lastParamStates.ph && state.lastParamStates.ph !== 'safe') {
+    pushAlert("pH Restored Safe", `Effluent pH normalized within safe environmental standard at ${ph} pH.`, "info");
   }
+  state.lastParamStates.ph = phState.code;
 
-  // TDS checks
+  // TDS checks (Non-spamming transition alerts)
   if (tdsState.code === 'critical') {
-    pushAlert("Critical TDS Breach", `Extremely high TDS levels logged at ${tds} ppm. Recycle loop active.`, "critical");
     hasCritical = true;
+    if (state.lastParamStates.tds !== 'critical') {
+      pushAlert("Critical TDS Breach", `Extremely high TDS levels logged at ${tds} ppm. Recycle loop active.`, "critical");
+    }
+  } else if (tdsState.code === 'warning') {
+    if (state.lastParamStates.tds !== 'warning') {
+      pushAlert("Elevated TDS Warning", `TDS elevated to ${tds} ppm (Safe: ≤ 350 ppm). Secondary filtration advised.`, "warning");
+    }
+  } else if (tdsState.code === 'safe' && state.lastParamStates.tds && state.lastParamStates.tds !== 'safe') {
+    pushAlert("TDS Restored Safe", `Total Dissolved Solids reduced to compliant level at ${tds} ppm.`, "info");
   }
+  state.lastParamStates.tds = tdsState.code;
 
-  // Turbidity checks
+  // Turbidity checks (Non-spamming transition alerts)
   if (turbState.code === 'critical') {
-    pushAlert("Critical Turbidity Breach", `Effluent turbidity registered a high ${turb} NTU. Divert to clarifiers.`, "critical");
     hasCritical = true;
+    if (state.lastParamStates.turb !== 'critical') {
+      pushAlert("Critical Turbidity Breach", `Effluent turbidity registered a high ${turb} NTU. Divert to clarifiers.`, "critical");
+    }
+  } else if (turbState.code === 'warning') {
+    if (state.lastParamStates.turb !== 'warning') {
+      pushAlert("Turbidity Warning", `Turbidity elevated to ${turb} NTU (Safe: ≤ 50 NTU). Check clarifier settling basins.`, "warning");
+    }
+  } else if (turbState.code === 'safe' && state.lastParamStates.turb && state.lastParamStates.turb !== 'safe') {
+    pushAlert("Turbidity Restored Safe", `Water clarity stabilized within safe discharge limits at ${turb} NTU.`, "info");
   }
+  state.lastParamStates.turb = turbState.code;
 
-  // Temp checks
+  // Temp checks (Non-spamming transition alerts)
   if (tempState.code === 'critical') {
-    pushAlert("Critical Temp Breach", `Wastewater temperature rose to thermal hazard limit: ${temp}°C. Cooling active.`, "critical");
     hasCritical = true;
+    if (state.lastParamStates.temp !== 'critical') {
+      pushAlert("Critical Temp Breach", `Wastewater temperature rose to thermal hazard limit: ${temp}°C. Cooling active.`, "critical");
+    }
+  } else if (tempState.code === 'warning') {
+    if (state.lastParamStates.temp !== 'warning') {
+      pushAlert("High Temperature Warning", `Effluent temperature elevated to ${temp}°C (Safe: ≤ 30°C). Cooling basin active.`, "warning");
+    }
+  } else if (tempState.code === 'safe' && state.lastParamStates.temp && state.lastParamStates.temp !== 'safe') {
+    pushAlert("Temperature Normal", `Effluent temperature cooled to normal level at ${temp}°C.`, "info");
+  }
+  state.lastParamStates.temp = tempState.code;
+
+  // Overall Safe Baseline Confirmation (logged ONCE when all parameters are healthy)
+  const isAllSafe = (phState.code === 'safe' && tdsState.code === 'safe' && 
+                     turbState.code === 'safe' && tempState.code === 'safe' && hwStatus === 0);
+  if (isAllSafe && !state.hasLoggedInitialSafe) {
+    pushAlert("All Parameters Safe", "All monitored wastewater parameters (pH, TDS, Turbidity, Temp) meet environmental compliance standards.", "info");
+    state.hasLoggedInitialSafe = true;
   }
 
   if (hasCritical) {
@@ -758,6 +829,10 @@ async function fetchThingSpeakData() {
     console.log("[ThingSpeak API Response] Raw payload received:", data);
     
     if (data && data.feeds && data.feeds.length > 0) {
+      if (state.hasReportedOffline) {
+        pushAlert("Cloud Connected", `Live telemetry stream established with Channel ${CONFIG.channelId}.`, "info");
+      }
+      state.hasReportedOffline = false;
       processFetchedFeeds(data.feeds);
       updateConnectionStatus(true);
     } else {
@@ -766,7 +841,12 @@ async function fetchThingSpeakData() {
   } catch (error) {
     console.error("[ThingSpeak API Error] Connection failed:", error);
     updateConnectionStatus(false, error.message);
-    pushAlert("ThingSpeak Connection Fail", `Channel ${CONFIG.channelId} unreachable: ${error.message}`, "critical");
+
+    // Only push offline alert once when opened / disconnected to avoid spamming
+    if (!state.hasReportedOffline) {
+      pushAlert("ThingSpeak Connection Fail", `Channel ${CONFIG.channelId} unreachable: ${error.message}`, "critical");
+      state.hasReportedOffline = true;
+    }
     
     // Maintain last successfully received data if request fails
     if (state.feeds && state.feeds.length > 0) {
@@ -816,26 +896,28 @@ function processFetchedFeeds(feeds) {
   const phStatus = getPhStatus(ph);
   DOM.badgePh.innerText = phStatus.text;
   DOM.badgePh.className = `status-badge-mini ${phStatus.class}`;
+  const getBarColor = (code) => code === 'critical' ? 'var(--danger)' : (code === 'warning' ? 'var(--warning)' : 'var(--success)');
+
   DOM.barPh.style.width = ph !== null ? `${(ph / 14) * 100}%` : "0%";
-  DOM.barPh.style.backgroundColor = phStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
+  DOM.barPh.style.backgroundColor = getBarColor(phStatus.code);
 
   const tdsStatus = getTdsStatus(tds);
   DOM.badgeTds.innerText = tdsStatus.text;
   DOM.badgeTds.className = `status-badge-mini ${tdsStatus.class}`;
   DOM.barTds.style.width = tds !== null ? `${Math.min(100, (tds / 1000) * 100)}%` : "0%";
-  DOM.barTds.style.backgroundColor = tdsStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
+  DOM.barTds.style.backgroundColor = getBarColor(tdsStatus.code);
 
   const turbStatus = getTurbidityStatus(turb);
   DOM.badgeTurbidity.innerText = turbStatus.text;
   DOM.badgeTurbidity.className = `status-badge-mini ${turbStatus.class}`;
   DOM.barTurbidity.style.width = turb !== null ? `${Math.min(100, (turb / 200) * 100)}%` : "0%";
-  DOM.barTurbidity.style.backgroundColor = turbStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
+  DOM.barTurbidity.style.backgroundColor = getBarColor(turbStatus.code);
 
   const tempStatus = getTemperatureStatus(temp);
   DOM.badgeTemperature.innerText = tempStatus.text;
   DOM.badgeTemperature.className = `status-badge-mini ${tempStatus.class}`;
   DOM.barTemperature.style.width = temp !== null ? `${Math.min(100, (temp / 60) * 100)}%` : "0%";
-  DOM.barTemperature.style.backgroundColor = tempStatus.code === 'critical' ? 'var(--danger)' : 'var(--success)';
+  DOM.barTemperature.style.backgroundColor = getBarColor(tempStatus.code);
 
   evaluateThresholds(ph, tds, turb, temp, hwStatus);
 
@@ -955,6 +1037,11 @@ DOM.configForm.addEventListener("submit", (e) => {
   localStorage.setItem("ts_channel_id", CONFIG.channelId);
   localStorage.setItem("ts_read_api_key", CONFIG.readApiKey);
 
+  // Reset alert state trackers for the new channel
+  state.hasReportedOffline = false;
+  state.hasLoggedInitialSafe = false;
+  state.lastParamStates = { ph: null, tds: null, turb: null, temp: null, hw: null };
+
   pushAlert("Config Sync", `Bound dashboard parameters to Channel ${CONFIG.channelId}.`, "info");
   
   DOM.loadingOverlay.classList.remove("hidden");
@@ -973,8 +1060,89 @@ DOM.btnLoadDefaultPublic.addEventListener("click", () => {
   DOM.configForm.dispatchEvent(new Event("submit"));
 });
 
+// ==========================================================================
+// 9. THEME CONTROLLER (LIGHT, DARK, SYSTEM)
+// ==========================================================================
+
+function updateChartTheme(isDark) {
+  const gridColor = isDark ? '#1F2937' : '#F1F5F9';
+  const tickColor = isDark ? '#94A3B8' : '#64748B';
+  const tooltipBg = isDark ? '#1E293B' : '#FFFFFF';
+  const tooltipBorder = isDark ? '#374151' : '#E2E8F0';
+  const tooltipTitle = isDark ? '#F8FAFC' : '#0F172A';
+  const tooltipBody = isDark ? '#CBD5E1' : '#475569';
+
+  Object.values(state.charts).forEach(chart => {
+    if (!chart || !chart.options) return;
+    if (chart.options.scales && chart.options.scales.x) {
+      if (chart.options.scales.x.grid) chart.options.scales.x.grid.color = gridColor;
+      if (chart.options.scales.x.ticks) chart.options.scales.x.ticks.color = tickColor;
+    }
+    if (chart.options.scales && chart.options.scales.y) {
+      if (chart.options.scales.y.grid) chart.options.scales.y.grid.color = gridColor;
+      if (chart.options.scales.y.ticks) chart.options.scales.y.ticks.color = tickColor;
+    }
+    if (chart.options.plugins && chart.options.plugins.tooltip) {
+      chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+      chart.options.plugins.tooltip.borderColor = tooltipBorder;
+      chart.options.plugins.tooltip.titleColor = tooltipTitle;
+      chart.options.plugins.tooltip.bodyColor = tooltipBody;
+    }
+    chart.update('none');
+  });
+}
+
+function applyTheme(theme) {
+  localStorage.setItem("app_theme", theme);
+
+  document.querySelectorAll(".theme-btn").forEach(btn => {
+    if (btn.getAttribute("data-theme-val") === theme) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
+  const isDark = (theme === "dark") || 
+                 (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (isDark) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+
+  updateChartTheme(isDark);
+}
+
+function initThemeSystem() {
+  const savedTheme = localStorage.getItem("app_theme") || "system";
+  applyTheme(savedTheme);
+
+  document.querySelectorAll(".theme-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const selected = btn.getAttribute("data-theme-val");
+      applyTheme(selected);
+    });
+  });
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if ((localStorage.getItem("app_theme") || "system") === "system") {
+      applyTheme("system");
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
+  initThemeSystem();
   initCharts();
+  
+  // Re-apply theme to charts now that they are initialized
+  const savedTheme = localStorage.getItem("app_theme") || "system";
+  const isDark = (savedTheme === "dark") || 
+                 (savedTheme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  updateChartTheme(isDark);
+
   loadConfigIntoForm();
 
   fetchThingSpeakData().then(() => {

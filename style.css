@@ -6,8 +6,8 @@
 
 :root {
   /* Typography */
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-code: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 
   /* Surfaces & Backgrounds (Neither completely white nor dark) */
@@ -70,6 +70,188 @@
 
   /* Transitions */
   --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   DARK THEME PALETTE & VARIABLES
+   ========================================================================== */
+[data-theme="dark"] {
+  /* Surfaces & Backgrounds */
+  --bg-app: #0B0F19;                  /* Deep dark canvas background */
+  --bg-surface: #111827;              /* Deep card surface (Slate-900 / Gray-900) */
+  --bg-surface-subtle: #1E293B;       /* Slate-800 for secondary sub-panels */
+  --bg-teal-subtle: rgba(20, 184, 166, 0.12); /* Environmental teal glow */
+  --bg-blue-subtle: rgba(59, 130, 246, 0.12); /* Industrial blue glow */
+
+  /* Primary Brand System (Teal) */
+  --teal-deep: #2DD4BF;               /* Bright teal for dark backgrounds */
+  --teal-primary: #14B8A6;            /* Primary Teal */
+  --teal-hover: #5EEAD4;              /* Teal hover */
+  --teal-border: rgba(45, 212, 191, 0.3); /* Translucent teal border */
+
+  /* Secondary Brand System (Blue) */
+  --blue-primary: #60A5FA;            /* Vibrant blue for dark backgrounds */
+  --blue-deep: #93C5FD;               /* Soft electric blue */
+  --blue-hover: #3B82F6;              /* Blue hover */
+  --blue-border: rgba(96, 165, 250, 0.3); /* Translucent blue border */
+
+  /* Text & Typography Hierarchy */
+  --text-primary: #F8FAFC;            /* Slate-50: Bright crisp readability */
+  --text-secondary: #94A3B8;          /* Slate-400: Clear metadata */
+  --text-muted: #64748B;              /* Slate-500: Subdued units */
+
+  /* Semantic Health Status Colors */
+  --status-healthy: #4ADE80;          /* Green-400 */
+  --status-healthy-bg: rgba(74, 222, 128, 0.12);
+  --status-healthy-border: rgba(74, 222, 128, 0.3);
+
+  --status-warning: #FBBF24;          /* Amber-400 */
+  --status-warning-bg: rgba(251, 191, 36, 0.12);
+  --status-warning-border: rgba(251, 191, 36, 0.3);
+
+  --status-critical: #F87171;         /* Red-400 */
+  --status-critical-bg: rgba(248, 113, 113, 0.14);
+  --status-critical-border: rgba(248, 113, 113, 0.32);
+
+  /* Shared Variables for Script.js bindings */
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+
+  /* Borders & Dividers */
+  --border-light: #1E293B;            /* Slate-800 */
+  --border-medium: #334155;           /* Slate-700 */
+
+  /* Elevation Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.6);
+}
+
+/* Dark Mode Component Overrides */
+[data-theme="dark"] .status-offline {
+  background: #1E293B;
+  color: #94A3B8;
+}
+
+[data-theme="dark"] .badge-tag-teal {
+  background: #111827;
+  color: #2DD4BF;
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+[data-theme="dark"] .loading-overlay {
+  background: rgba(11, 15, 25, 0.92);
+}
+
+[data-theme="dark"] .alert-critical-item {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+[data-theme="dark"] .alert-critical-item .alert-item-icon {
+  background: rgba(220, 38, 38, 0.22);
+  color: #F87171;
+}
+[data-theme="dark"] .alert-critical-item .alert-title {
+  color: #FCA5A5;
+}
+
+[data-theme="dark"] .alert-warning-item {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+[data-theme="dark"] .alert-warning-item .alert-item-icon {
+  background: rgba(217, 119, 6, 0.22);
+  color: #FBBF24;
+}
+[data-theme="dark"] .alert-warning-item .alert-title {
+  color: #FDE68A;
+}
+
+[data-theme="dark"] .alert-safe-item {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: rgba(22, 163, 74, 0.3);
+}
+[data-theme="dark"] .alert-safe-item .alert-item-icon {
+  background: rgba(22, 163, 74, 0.22);
+  color: #4ADE80;
+}
+[data-theme="dark"] .alert-safe-item .alert-title {
+  color: #86EFAC;
+}
+
+[data-theme="dark"] .wqi-good {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86EFAC;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+[data-theme="dark"] .wqi-poor {
+  background: rgba(234, 88, 12, 0.15);
+  color: #FDBA74;
+  border-color: rgba(234, 88, 12, 0.3);
+}
+
+[data-theme="dark"] .filter-btn {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .filter-btn:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .filter-btn.active {
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  border-color: var(--teal-primary);
+}
+
+[data-theme="dark"] .sidebar-nav .nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--teal-deep);
+}
+
+[data-theme="dark"] .sidebar-nav .nav-link.active {
+  background: rgba(20, 184, 166, 0.15);
+  color: var(--teal-deep);
+}
+
+[data-theme="dark"] .gauge-bg-track {
+  stroke: #1E293B;
+}
+
+[data-theme="dark"] .btn-secondary-outline {
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary-outline:hover {
+  background: var(--bg-surface-subtle);
+}
+
+[data-theme="dark"] .btn-danger-outline {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #F87171;
+}
+
+[data-theme="dark"] .btn-danger-outline:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 /* ==========================================================================
@@ -357,6 +539,63 @@ html, body {
 
 .refresh-countdown i {
   color: var(--teal-deep);
+}
+
+/* Theme Selector Bar */
+.theme-selector-bar {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-light);
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  gap: 2px;
+}
+
+.theme-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: var(--transition);
+  outline: none;
+}
+
+.theme-btn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .theme-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.theme-btn.active {
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.theme-btn.active i {
+  color: #FFFFFF;
+}
+
+.theme-btn i {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.theme-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--teal-primary);
 }
 
 .live-clock {
@@ -1884,11 +2123,11 @@ html, body {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 14px 16px;
-  font-family: 'Inter', var(--font-body);
+  font-family: var(--font-body);
 }
 
 .info-cell strong {
-  font-family: 'Inter', var(--font-display);
+  font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--teal-deep);
@@ -1899,7 +2138,7 @@ html, body {
 }
 
 .info-cell p {
-  font-family: 'Inter', var(--font-body);
+  font-family: var(--font-body);
   font-size: 0.85rem;
   color: var(--text-primary);
   line-height: 1.5;
@@ -1971,6 +2210,14 @@ html, body {
   
   .live-clock {
     display: none;
+  }
+  
+  .theme-btn span {
+    display: none;
+  }
+  
+  .theme-btn {
+    padding: 5px 8px;
   }
   
   .main-content {
