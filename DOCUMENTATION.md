@@ -127,15 +127,15 @@ The telemetry architecture uses **ThingSpeak IoT REST Services** for real-time c
 - **Default Result Limit:** `100` feeds per batch request
 - **Client Polling Interval:** 20 seconds (configurable via UI countdown loop)
 
-### 4.2 Cloud Field Mapping Definition
+### 4.2 Cloud Field Mapping & Multi-Tier Safety Standards
 
-| Field Name | Physical Metric | Data Type | Engineering Units | Safe Threshold | Unsafe Condition |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `field1` | pH Value | Float (`%.2f`) | pH scale (0–14) | $6.5 \le \text{pH} \le 8.5$ | $\text{pH} < 6.5$ or $\text{pH} > 8.5$ |
-| `field2` | Total Dissolved Solids | Float / Integer | ppm (parts per million) | $\le 500\text{ ppm}$ | $> 500\text{ ppm}$ |
-| `field3` | Turbidity | Float (`%.2f`) | NTU (Nephelometric Units)| $\le 100\text{ NTU}$ | $> 100\text{ NTU}$ |
-| `field4` | Temperature | Float (`%.2f`) | °C (Celsius) | $\le 35\text{ }^\circ\text{C}$ | $> 35\text{ }^\circ\text{C}$ |
-| `field5` | Overall Hardware Status | Integer | Binary flag | `0` (SAFE) | `1` (UNSAFE) |
+| Field Name | Physical Metric | Data Type | Units | 🟢 Safe Limit | 🟡 Warning Limit | 🔴 Critical Breach |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `field1` | pH Value | Float (`%.2f`) | pH scale | $6.5 \le \text{pH} \le 8.5$ | $6.0 \le \text{pH} < 6.5$ or $8.5 < \text{pH} \le 9.0$ | $\text{pH} < 6.0$ or $\text{pH} > 9.0$ |
+| `field2` | Total Dissolved Solids | Float / Integer | ppm | $\le 350\text{ ppm}$ | $351 - 500\text{ ppm}$ | $> 500\text{ ppm}$ |
+| `field3` | Turbidity | Float (`%.2f`) | NTU | $\le 50\text{ NTU}$ | $51 - 100\text{ NTU}$ | $> 100\text{ NTU}$ |
+| `field4` | Temperature | Float (`%.2f`) | °C | $\le 30^\circ\text{C}$ | $31 - 35^\circ\text{C}$ | $> 35^\circ\text{C}$ |
+| `field5` | Overall Hardware Status | Integer | Binary flag | `0` (SAFE) | — | `1` (UNSAFE) |
 
 ---
 
@@ -181,34 +181,49 @@ The system incorporates an automated inference engine that evaluates multi-varia
 
 ## 6. Frontend Architecture & Module Breakdown
 
-The dashboard is built using modern semantic HTML5, glassmorphic dark-theme CSS3 (`style.css`), and object-oriented vanilla JavaScript (`script.js`):
+The user interface (**QualityGuard**) is built as a high-performance, responsive Single-Page Application (SPA) leveraging semantic HTML5, a custom glassmorphism design system (`style.css`), and object-oriented vanilla JavaScript (`script.js`):
 
 ```text
 IoT-Based-Industrial-Wastewater-Quality-Monitoring-and-Alert-System/
 ├── index.html          # Semantic Single-Page Application (SPA) container
-├── style.css           # Glassmorphism dark UI, animations, responsive grid
-├── script.js           # ThingSpeak REST consumer, WQI engine, Chart.js managers
-└── README.md           # Quickstart & project overview
+├── style.css           # Glassmorphism design system, Light/Dark variables, responsive layout
+├── script.js           # ThingSpeak REST client, WQI calculation, Chart.js managers, alert engine
+├── DOCUMENTATION.md    # Comprehensive academic and technical documentation
+└── README.md           # Project overview and quickstart guide
 ```
 
-### 6.1 UI Modules & Navigation
+### 6.1 Design System & Typography
+1. **Typography Hierarchy:**
+   - **Primary Display & Headings:** `Space Grotesk` (weights 300, 400, 500, 600, 700) for modern engineering legibility.
+   - **Monospaced Telemetry:** `JetBrains Mono` for precise tabular sensor readings, timestamps, and countdown intervals.
+2. **Comprehensive Theme Engine (Light, Dark, System Auto):**
+   - High-contrast **Dark Mode** (`[data-theme="dark"]`) with deep slate canvases (`#0B0F19`) and card surfaces (`#111827`).
+   - Clean **Light Mode** (`[data-theme="light"]`) for high-ambient-light industrial plant floors.
+   - **System Auto-Sync:** Dynamically syncs with the operating system preference (`prefers-color-scheme`).
+   - **Zero Flash of Unstyled Theme (FOUT):** Immediate `<head>` script execution prevents page flash on load.
+   - **Dynamic Chart Adaptation:** Chart.js scales, grid lines, and tooltips automatically recalculate on theme toggles.
+
+### 6.2 UI Modules & Navigation
 1. **Telemetry Dashboard:**
-   - 4 Real-time Sensor Cards (pH, TDS, Turbidity, Temperature) featuring animated value meters, threshold safety badges, and timestamp counters.
+   - **Branding Header:** *QualityGuard* facility badge and *"Smart Water Quality. Real-Time Insights."* subtitle.
+   - 4 Real-time Sensor Cards (pH, TDS, Turbidity, Temperature) featuring animated value meters, safety badges, and timestamp counters.
    - Dual header indicators: Cloud Connection Status (`Cloud Online` / `Cloud Error`) and Factory Hardware Status (`Sys Safe` / `Sys Unsafe` / `Sys Offline`).
    - SVG Circular WQI Gauge showing real-time composite score.
    - Edge AI Decision Card showing confidence percentage and recommended operational steps.
    - Emergency banner and audio chime upon critical threshold violations.
 2. **Analytics & Historical Trends:**
-   - 5 Chart.js dynamic visualizations:
+   - 5 dynamic Chart.js visualizations:
      - pH Level Trend
      - TDS Trend (ppm)
      - Turbidity Trend (NTU)
      - Water Temperature Trend (°C)
      - System Status Step Trend (`0 = SAFE`, `1 = UNSAFE`)
    - Rolling 50-sample timeframe with responsive gradient backdrops.
-3. **Alerts & Threshold Logs:**
-   - Categorized alert cards with timestamp, description, and status icons.
-   - Filter buttons: *All Alerts*, *Critical*, *Warning*, *Safe/Info*.
+3. **Alerts & Threshold Logs (Anti-Spam Engine):**
+   - **Transition-Based Alerting:** Triggers entries only on state changes (Safe $\rightarrow$ Warning $\rightarrow$ Critical or upon recovery) rather than repeatedly logging every 20-second poll.
+   - **Single-Notice Offline Detection:** Logs ThingSpeak connection drops exactly once upon disconnect, avoiding alert flood during network outages.
+   - **Consecutive Duplicate Suppression:** Discards identical consecutive alerts automatically.
+   - **Active Filter Tab Retention:** Keeps view locked on *Critical Hazards*, *Parameter Warnings*, or *Safe / Informational* during background telemetry refreshes.
    - History clearance button and audio alert toggle switch.
 4. **Monitoring Reports:**
    - Statistical Aggregate Matrix: Mean, Minimum, Maximum, and Current values against regulatory benchmarks.
@@ -217,7 +232,8 @@ IoT-Based-Industrial-Wastewater-Quality-Monitoring-and-Alert-System/
    - Dedicated Print-to-PDF layout with formal audit headers, report IDs, and supervisor sign-off lines.
 5. **System Status & Configuration:**
    - Dynamic Channel ID and Read API Key configuration form saved to browser `localStorage`.
-   - Node Diagnostics indicating live telemetry transmission per individual sensor probe.
+   - Dedicated Theme & Interface Preference selector synchronized across the header and settings deck.
+   - Physical sensor specification cards documenting pinouts, ADC channels, and measuring principles.
 
 ---
 
