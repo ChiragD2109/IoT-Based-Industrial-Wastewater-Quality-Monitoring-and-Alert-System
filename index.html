@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI-Powered IoT-Based Wastewater Monitoring Dashboard</title>
-  <!-- Google Fonts -->
+  <title>IoT-Based Industrial Wastewater Quality Monitoring and Alert System</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,49 +21,53 @@
   <div id="loading-overlay" class="loading-overlay">
     <div class="spinner-container">
       <div class="water-spinner"></div>
-      <p>Connecting to Wastewater Monitoring Network...</p>
+      <h3>Connecting to Telemetry Station...</h3>
+      <p>Synchronizing Real-Time Industrial Effluent Feeds</p>
     </div>
   </div>
 
   <div class="app-container">
     
-    <!-- HEADER -->
+    <!-- HEADER BAR -->
     <header class="app-header">
       <div class="header-left">
-        <button id="sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle Sidebar">
+        <button id="sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle Navigation" title="Toggle Sidebar">
           <i class="fa-solid fa-bars"></i>
         </button>
         <div class="logo-area">
           <div class="logo-icon">
-            <i class="fa-solid fa-droplet-slash-line fa-xl"></i>
+            <i class="fa-solid fa-droplet fa-lg"></i>
             <span class="pulse-ring"></span>
           </div>
           <div class="logo-text">
-            <h1>IoT-Based Industrial Wastewater Quality Monitoring and Alert System</h1>
-            <span class="sub-title">Smart Factory Water Quality Assurance Platform</span>
+            <div class="logo-title-row">
+              <h1>Industrial Wastewater Monitoring</h1>
+              <span class="facility-badge"><i class="fa-solid fa-industry"></i> ETP Unit #01</span>
+            </div>
+            <span class="sub-title">Automated Effluent Quality Assurance & Environmental Compliance Platform</span>
           </div>
         </div>
       </div>
       
       <div class="header-right">
-        <!-- Live Status Indicators -->
+        <!-- Telemetry Control Deck -->
         <div class="status-indicator-bar">
-          <div id="connection-status" class="status-badge status-offline">
+          <div id="connection-status" class="status-badge status-offline" title="ThingSpeak Cloud API Status">
             <span class="status-dot"></span>
             <span class="status-text">Disconnected</span>
           </div>
-          <div id="hardware-status" class="status-badge status-offline">
+          <div id="hardware-status" class="status-badge status-offline" title="Factory Discharge Valve Hardware Status">
             <span class="status-dot"></span>
             <span class="status-text">Sys Offline</span>
           </div>
-          <div class="refresh-countdown">
+          <div class="refresh-countdown" title="Time until next sensor telemetry poll">
             <i class="fa-solid fa-arrows-rotate spinner-icon" id="refresh-icon"></i>
-            <span id="countdown-timer">15s</span>
+            <span id="countdown-timer">20s</span>
           </div>
         </div>
         
         <!-- Live Clock -->
-        <div class="live-clock">
+        <div class="live-clock" title="Current Telemetry Station Time">
           <i class="fa-regular fa-clock"></i>
           <span id="current-time">00:00:00 AM</span>
         </div>
@@ -72,80 +76,123 @@
 
     <div class="app-body">
       
-      <!-- SIDEBAR -->
+      <!-- SIDEBAR NAVIGATION -->
       <aside class="app-sidebar" id="app-sidebar">
-        <nav class="sidebar-nav">
-          <ul>
-            <li>
-              <a href="#" class="nav-link active" data-target="dashboard-section">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Dashboard</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link" data-target="analytics-section">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Analytics</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link" data-target="alerts-section">
-                <i class="fa-solid fa-bell"></i>
-                <span>Alerts & Notifications</span>
-                <span class="badge-count" id="active-alert-count">0</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link" data-target="reports-section">
-                <i class="fa-solid fa-file-invoice"></i>
-                <span>Monitoring Reports</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link" data-target="system-section">
-                <i class="fa-solid fa-gears"></i>
-                <span>System Status & Config</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <div class="sidebar-footer">
-          <p class="project-tag">made by batch 7</p>
-          <p class="project-year">2026</p>
+        <div class="sidebar-top">
+          <div class="sidebar-heading">MONITORING MODULES</div>
+          <nav class="sidebar-nav">
+            <ul>
+              <li>
+                <a href="#" class="nav-link active" data-target="dashboard-section">
+                  <i class="fa-solid fa-gauge-high"></i>
+                  <span>Live Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link" data-target="analytics-section">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span>Analytics & Trends</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link" data-target="alerts-section">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span>Alerts & Logs</span>
+                  <span class="badge-count" id="active-alert-count">0</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link" data-target="reports-section">
+                  <i class="fa-solid fa-file-waveform"></i>
+                  <span>Compliance Reports</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link" data-target="system-section">
+                  <i class="fa-solid fa-sliders"></i>
+                  <span>System Config</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+        <!-- Sidebar Telemetry Card -->
+        <div class="sidebar-footer-card">
+          <div class="hardware-spec-badge">
+            <i class="fa-solid fa-microchip"></i>
+            <span>ESP32 Wi-Fi Node</span>
+          </div>
+          <p class="channel-label">Channel: <strong>3408255</strong></p>
+          <div class="footer-divider"></div>
+          <p class="project-tag">SJB Institute of Technology</p>
+          <p class="project-batch">Dept of ISE • Batch A7 (2026)</p>
         </div>
       </aside>
 
-      <!-- MAIN CONTENT PANEL -->
+      <!-- MAIN CONTENT CONTAINER -->
       <main class="main-content">
         
-        <!-- ==================== DASHBOARD SECTION ==================== -->
+        <!-- ==================== 1. DASHBOARD SECTION ==================== -->
         <section id="dashboard-section" class="content-section active">
           
-          <!-- Alert Banner (Appears if any critical value is active) -->
+          <!-- Critical Alert Banner -->
           <div id="critical-alert-banner" class="critical-alert-banner hidden">
-            <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
-            <span id="alert-banner-text">CRITICAL BREACH: Wastewater parameters exceed safe limits. Immediate action required.</span>
-          </div>
-
-          <!-- Section Intro -->
-          <div class="section-header">
-            <div>
-              <h2>Telemetry Dashboard</h2>
-              <p>Real-time physical & chemical sensor nodes telemetry overview</p>
+            <div class="alert-banner-icon">
+              <i class="fa-solid fa-circle-radiation fa-lg"></i>
             </div>
-            <div class="dashboard-actions">
-              <span id="data-mode-badge" class="badge-mode mode-live">LIVE</span>
-              <button id="trigger-refresh-btn" class="btn btn-secondary">
-                <i class="fa-solid fa-arrows-rotate"></i> Sync Now
-              </button>
+            <div class="alert-banner-content">
+              <strong>CRITICAL SAFETY ALERT</strong>
+              <span id="alert-banner-text">Wastewater parameters exceed safe limits. Effluent discharge gate diverted.</span>
             </div>
           </div>
 
-          <!-- telemetry grids -->
+          <!-- Section Overview Banner -->
+          <div class="station-overview-banner">
+            <div class="overview-left-card">
+              <div class="overview-header">
+                <span class="badge-tag-teal"><i class="fa-solid fa-satellite-dish"></i> Active Telemetry Station</span>
+                <span id="data-mode-badge" class="badge-mode mode-live">LIVE CLOUD</span>
+              </div>
+              <h2>Industrial Effluent Monitoring Console</h2>
+              <p>Continuous physical & chemical telemetry stream tracking pH, TDS, Turbidity, and Temperature.</p>
+            </div>
+            <div class="overview-right-card">
+              <div class="kpi-mini-grid">
+                <div class="kpi-mini-item">
+                  <span class="kpi-label">Regulatory Benchmark</span>
+                  <span class="kpi-val">CPCB / WHO Safe Norms</span>
+                </div>
+                <div class="kpi-mini-item">
+                  <span class="kpi-label">Polling Cadence</span>
+                  <span class="kpi-val">20s Interval</span>
+                </div>
+                <div class="kpi-mini-item">
+                  <span class="kpi-label">Active Transmitters</span>
+                  <span class="kpi-val">ESP32 Core 01 (Wi-Fi)</span>
+                </div>
+              </div>
+              <div class="sync-action-wrap">
+                <button id="trigger-refresh-btn" class="btn btn-secondary">
+                  <i class="fa-solid fa-arrows-rotate"></i> Sync Cloud Telemetry
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Subtitle -->
+          <div class="section-sub-heading">
+            <div class="heading-left">
+              <h3><i class="fa-solid fa-chart-simple"></i> Real-Time Telemetry Parameters</h3>
+              <p>Physical sensor node readings mapped to factory discharge limits</p>
+            </div>
+          </div>
+
+          <!-- Telemetry 4-Card Grid -->
           <div class="telemetry-grid">
             
-            <!-- pH Level Card -->
-            <div class="telemetry-card" id="card-ph">
+            <!-- 1. pH Level Card -->
+            <div class="telemetry-card card-ph-accent" id="card-ph">
               <div class="card-glow"></div>
               <div class="card-header-v2">
                 <div class="sensor-icon ph-icon">
@@ -153,7 +200,7 @@
                 </div>
                 <div class="sensor-info">
                   <h3>pH Level</h3>
-                  <p class="sensor-desc">Acidity/Alkalinity</p>
+                  <p class="sensor-desc">Acidity / Alkalinity Balance</p>
                 </div>
                 <div class="status-badge-mini" id="badge-ph">🟢 Safe</div>
               </div>
@@ -162,23 +209,24 @@
                   <span class="value-num" id="val-ph">--</span>
                   <span class="value-unit">pH</span>
                 </div>
-                <!-- Sparkline / Progress Bar indicator -->
+                <!-- Progress & Range Indicator -->
                 <div class="indicator-bar-container">
                   <div class="indicator-bar" id="bar-ph" style="width: 50%;"></div>
-                  <div class="indicator-markers">
-                    <span>0</span>
-                    <span class="marker-safe">Safe (6.5-8.5)</span>
-                    <span>14</span>
-                  </div>
+                </div>
+                <div class="indicator-markers">
+                  <span>0.0</span>
+                  <span class="marker-safe">Safe Range (6.5 – 8.5)</span>
+                  <span>14.0</span>
                 </div>
               </div>
               <div class="card-footer-v2">
-                <span>Updated: <span id="time-ph" class="timestamp-span">--</span></span>
+                <span class="sensor-channel-tag"><i class="fa-solid fa-plug"></i> GPIO 34</span>
+                <span class="timestamp-wrap">Updated: <span id="time-ph" class="timestamp-span">--</span></span>
               </div>
             </div>
 
-            <!-- TDS Level Card -->
-            <div class="telemetry-card" id="card-tds">
+            <!-- 2. TDS Level Card -->
+            <div class="telemetry-card card-tds-accent" id="card-tds">
               <div class="card-glow"></div>
               <div class="card-header-v2">
                 <div class="sensor-icon tds-icon">
@@ -186,7 +234,7 @@
                 </div>
                 <div class="sensor-info">
                   <h3>Total Dissolved Solids</h3>
-                  <p class="sensor-desc">Salinity & Minerals</p>
+                  <p class="sensor-desc">Salinity & Dissolved Minerals</p>
                 </div>
                 <div class="status-badge-mini" id="badge-tds">🟢 Safe</div>
               </div>
@@ -197,20 +245,21 @@
                 </div>
                 <div class="indicator-bar-container">
                   <div class="indicator-bar" id="bar-tds" style="width: 30%;"></div>
-                  <div class="indicator-markers">
-                    <span>0</span>
-                    <span class="marker-safe">Safe (0-500)</span>
-                    <span>1500+</span>
-                  </div>
+                </div>
+                <div class="indicator-markers">
+                  <span>0 ppm</span>
+                  <span class="marker-safe">Safe Threshold (≤ 500)</span>
+                  <span>1500+ ppm</span>
                 </div>
               </div>
               <div class="card-footer-v2">
-                <span>Updated: <span id="time-tds" class="timestamp-span">--</span></span>
+                <span class="sensor-channel-tag"><i class="fa-solid fa-plug"></i> GPIO 35</span>
+                <span class="timestamp-wrap">Updated: <span id="time-tds" class="timestamp-span">--</span></span>
               </div>
             </div>
 
-            <!-- Turbidity Card -->
-            <div class="telemetry-card" id="card-turbidity">
+            <!-- 3. Turbidity Card -->
+            <div class="telemetry-card card-turb-accent" id="card-turbidity">
               <div class="card-glow"></div>
               <div class="card-header-v2">
                 <div class="sensor-icon turbidity-icon">
@@ -218,7 +267,7 @@
                 </div>
                 <div class="sensor-info">
                   <h3>Turbidity</h3>
-                  <p class="sensor-desc">Water Clarity</p>
+                  <p class="sensor-desc">Effluent Clarity & Suspended Solids</p>
                 </div>
                 <div class="status-badge-mini" id="badge-turbidity">🟢 Safe</div>
               </div>
@@ -229,20 +278,21 @@
                 </div>
                 <div class="indicator-bar-container">
                   <div class="indicator-bar" id="bar-turbidity" style="width: 20%;"></div>
-                  <div class="indicator-markers">
-                    <span>0</span>
-                    <span class="marker-safe">Safe (0-100)</span>
-                    <span>200+</span>
-                  </div>
+                </div>
+                <div class="indicator-markers">
+                  <span>0 NTU</span>
+                  <span class="marker-safe">Safe Limit (≤ 100)</span>
+                  <span>200+ NTU</span>
                 </div>
               </div>
               <div class="card-footer-v2">
-                <span>Updated: <span id="time-turbidity" class="timestamp-span">--</span></span>
+                <span class="sensor-channel-tag"><i class="fa-solid fa-plug"></i> GPIO 32</span>
+                <span class="timestamp-wrap">Updated: <span id="time-turbidity" class="timestamp-span">--</span></span>
               </div>
             </div>
 
-            <!-- Temperature Card -->
-            <div class="telemetry-card" id="card-temperature">
+            <!-- 4. Temperature Card -->
+            <div class="telemetry-card card-temp-accent" id="card-temperature">
               <div class="card-glow"></div>
               <div class="card-header-v2">
                 <div class="sensor-icon temp-icon">
@@ -250,7 +300,7 @@
                 </div>
                 <div class="sensor-info">
                   <h3>Water Temperature</h3>
-                  <p class="sensor-desc">Thermal Pollution</p>
+                  <p class="sensor-desc">Thermal Pollution Index</p>
                 </div>
                 <div class="status-badge-mini" id="badge-temperature">🟢 Safe</div>
               </div>
@@ -261,73 +311,94 @@
                 </div>
                 <div class="indicator-bar-container">
                   <div class="indicator-bar" id="bar-temperature" style="width: 45%;"></div>
-                  <div class="indicator-markers">
-                    <span>0</span>
-                    <span class="marker-safe">Safe (&le;35)</span>
-                    <span>60</span>
-                  </div>
+                </div>
+                <div class="indicator-markers">
+                  <span>0 °C</span>
+                  <span class="marker-safe">Safe Limit (≤ 35 °C)</span>
+                  <span>60 °C</span>
                 </div>
               </div>
               <div class="card-footer-v2">
-                <span>Updated: <span id="time-temperature" class="timestamp-span">--</span></span>
+                <span class="sensor-channel-tag"><i class="fa-solid fa-plug"></i> GPIO 4</span>
+                <span class="timestamp-wrap">Updated: <span id="time-temperature" class="timestamp-span">--</span></span>
               </div>
             </div>
 
           </div>
 
-          <!-- Bottom Grid: Overall WQI & AI Insights -->
+          <!-- Bottom Split Grid: WQI & Edge AI -->
           <div class="summary-dashboard-grid">
             
-            <!-- Overall Water Quality Status -->
+            <!-- Overall Water Quality Status Card -->
             <div class="summary-card overall-wqi-card">
               <div class="summary-card-header">
-                <h3><i class="fa-solid fa-gauge-high"></i> Overall Water Quality Status</h3>
+                <div class="card-title-group">
+                  <i class="fa-solid fa-gauge-high"></i>
+                  <div>
+                    <h3>Composite Water Quality Index (WQI)</h3>
+                    <span class="card-header-sub">Weighted Arithmetic Quality Model</span>
+                  </div>
+                </div>
+                <span class="wqi-calc-tag">CPCB Standard</span>
               </div>
               <div class="summary-card-content">
                 <div class="wqi-visual-container">
                   <div class="wqi-gauge">
                     <svg viewBox="0 0 100 50" class="gauge-svg">
-                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e0e0e0" stroke-width="8" stroke-linecap="round" />
+                      <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="8" stroke-linecap="round" />
                       <path id="wqi-gauge-path" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#wqi-gradient)" stroke-dasharray="125.6" stroke-dashoffset="125.6" stroke-width="8" stroke-linecap="round" />
                       
                       <defs>
                         <linearGradient id="wqi-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stop-color="#E74C3C" />
-                          <stop offset="50%" stop-color="#F1C40F" />
-                          <stop offset="100%" stop-color="#2ECC71" />
+                          <stop offset="0%" stop-color="#DC2626" />
+                          <stop offset="50%" stop-color="#D97706" />
+                          <stop offset="100%" stop-color="#16A34A" />
                         </linearGradient>
                       </defs>
                     </svg>
                     <div class="wqi-display">
                       <span id="wqi-score-number" class="wqi-score">--</span>
-                      <span class="wqi-label">WQI Score</span>
+                      <span class="wqi-label">WQI Index</span>
                     </div>
                   </div>
                 </div>
                 <div class="wqi-text-summary">
                   <div class="wqi-status-badge-large" id="wqi-status-badge">Moderate</div>
                   <p id="wqi-status-text">Determined using combined chemical analysis of physical and mineral constituents.</p>
+                  <div class="wqi-weight-chips">
+                    <span class="chip-item">pH: 35%</span>
+                    <span class="chip-item">TDS: 20%</span>
+                    <span class="chip-item">Turb: 30%</span>
+                    <span class="chip-item">Temp: 15%</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- AI-Powered Wastewater Classifier / Recommendations -->
+            <!-- Edge AI Insights & Recommendations Card -->
             <div class="summary-card ai-insights-card">
               <div class="summary-card-header">
-                <h3><i class="fa-solid fa-brain"></i> AI Water Quality Inference</h3>
+                <div class="card-title-group">
+                  <i class="fa-solid fa-microchip"></i>
+                  <div>
+                    <h3>Edge AI Water Quality Classifier</h3>
+                    <span class="card-header-sub">Rule-Based Effluent Inference & Automation</span>
+                  </div>
+                </div>
+                <span class="ai-badge"><i class="fa-solid fa-bolt"></i> Real-Time</span>
               </div>
               <div class="summary-card-content">
                 <div class="ai-inference-header">
-                  <div class="ai-badge"><i class="fa-solid fa-microchip"></i> Edge AI Engine</div>
-                  <span class="ai-confidence">Confidence: <strong id="ai-confidence-val">--%</strong></span>
+                  <span class="ai-indicator-label"><i class="fa-solid fa-circle-nodes"></i> Model Confidence:</span>
+                  <span class="ai-confidence"><strong id="ai-confidence-val">--%</strong></span>
                 </div>
                 <div class="ai-decision-block">
-                  <div class="label">Classification Output:</div>
-                  <div class="classification-result" id="ai-classification">Awaiting Data...</div>
+                  <div class="label">Diagnosed Effluent State:</div>
+                  <div class="classification-result" id="ai-classification">Awaiting Telemetry Packet...</div>
                 </div>
                 <div class="ai-recommendations">
-                  <div class="label"><i class="fa-solid fa-clipboard-list"></i> Prescribed Treatment Action:</div>
-                  <p id="ai-recommendation-text">Please ensure sensors are configured properly and receiving data feeds from the telemetry station.</p>
+                  <div class="label"><i class="fa-solid fa-prescription-bottle-medical"></i> Prescribed Corrective Action:</div>
+                  <p id="ai-recommendation-text">Ensure all sensor probes are submerged and telemetry transmitter is active.</p>
                 </div>
               </div>
             </div>
@@ -336,15 +407,15 @@
 
         </section>
 
-        <!-- ==================== ANALYTICS SECTION ==================== -->
+        <!-- ==================== 2. ANALYTICS SECTION ==================== -->
         <section id="analytics-section" class="content-section">
           <div class="section-header">
             <div>
-              <h2>Analytics & Historical Trends</h2>
-              <p>Historical charts plotted using the last 50 telemetry readings from ThingSpeak</p>
+              <h2>Telemetry Analytics & Time-Series Trends</h2>
+              <p>Historical sensor trajectories plotted using the latest 50 samples received from ThingSpeak</p>
             </div>
             <div class="analytics-timeframe">
-              <span class="badge"><i class="fa-solid fa-database"></i> 50 Samples</span>
+              <span class="badge-tag-blue"><i class="fa-solid fa-database"></i> 50 Rolling Samples</span>
             </div>
           </div>
 
@@ -352,8 +423,11 @@
             <!-- pH Chart -->
             <div class="chart-card">
               <div class="chart-header">
-                <h4>pH Level Trend</h4>
-                <span class="chart-tag ph-tag">pH</span>
+                <div class="chart-title-wrap">
+                  <span class="dot-indicator ph"></span>
+                  <h4>pH Level Trend</h4>
+                </div>
+                <span class="chart-tag ph-tag">Acidity / Alkalinity</span>
               </div>
               <div class="chart-container">
                 <canvas id="chart-ph-canvas"></canvas>
@@ -363,8 +437,11 @@
             <!-- TDS Chart -->
             <div class="chart-card">
               <div class="chart-header">
-                <h4>TDS Trend (ppm)</h4>
-                <span class="chart-tag tds-tag">TDS</span>
+                <div class="chart-title-wrap">
+                  <span class="dot-indicator tds"></span>
+                  <h4>Total Dissolved Solids (TDS)</h4>
+                </div>
+                <span class="chart-tag tds-tag">ppm</span>
               </div>
               <div class="chart-container">
                 <canvas id="chart-tds-canvas"></canvas>
@@ -374,8 +451,11 @@
             <!-- Turbidity Chart -->
             <div class="chart-card">
               <div class="chart-header">
-                <h4>Turbidity Trend (NTU)</h4>
-                <span class="chart-tag turbidity-tag">Turbidity</span>
+                <div class="chart-title-wrap">
+                  <span class="dot-indicator turbidity"></span>
+                  <h4>Turbidity Trend</h4>
+                </div>
+                <span class="chart-tag turbidity-tag">NTU</span>
               </div>
               <div class="chart-container">
                 <canvas id="chart-turbidity-canvas"></canvas>
@@ -385,8 +465,11 @@
             <!-- Temp Chart -->
             <div class="chart-card">
               <div class="chart-header">
-                <h4>Temperature Trend (°C)</h4>
-                <span class="chart-tag temp-tag">Temp</span>
+                <div class="chart-title-wrap">
+                  <span class="dot-indicator temp"></span>
+                  <h4>Water Temperature Trend</h4>
+                </div>
+                <span class="chart-tag temp-tag">°C</span>
               </div>
               <div class="chart-container">
                 <canvas id="chart-temp-canvas"></canvas>
@@ -396,8 +479,11 @@
             <!-- Status Chart -->
             <div class="chart-card wide-card">
               <div class="chart-header">
-                <h4>System Status Trend</h4>
-                <span class="chart-tag status-tag">Status</span>
+                <div class="chart-title-wrap">
+                  <span class="dot-indicator status-dot-icon"></span>
+                  <h4>System Operational Safety History (Field 5)</h4>
+                </div>
+                <span class="chart-tag status-tag">0 = SAFE | 1 = UNSAFE</span>
               </div>
               <div class="chart-container">
                 <canvas id="chart-status-canvas"></canvas>
@@ -406,16 +492,16 @@
           </div>
         </section>
 
-        <!-- ==================== ALERTS & NOTIFICATIONS SECTION ==================== -->
+        <!-- ==================== 3. ALERTS & NOTIFICATIONS SECTION ==================== -->
         <section id="alerts-section" class="content-section">
           <div class="section-header">
             <div>
-              <h2>Alerts & Threshold Logs</h2>
-              <p>Real-time log of safe, warning, and critical water parameter violations</p>
+              <h2>Incident Alerts & Threshold Violation Logs</h2>
+              <p>Auditable incident log classifying safe, warning, and critical water parameter threshold breaches</p>
             </div>
             <div class="alert-controls">
               <button id="clear-alerts-btn" class="btn btn-danger-outline btn-sm">
-                <i class="fa-solid fa-trash-can"></i> Clear History
+                <i class="fa-solid fa-trash-can"></i> Clear Incident Log
               </button>
               <button id="toggle-sound-btn" class="btn btn-secondary-outline btn-sm">
                 <i class="fa-solid fa-volume-high" id="sound-icon"></i> <span id="sound-btn-text">Audio Alert: On</span>
@@ -425,65 +511,65 @@
 
           <div class="alerts-log-container">
             <div class="filter-tabs">
-              <button class="filter-btn active" data-filter="all">All Alerts</button>
-              <button class="filter-btn" data-filter="critical"><span class="badge-dot red"></span> Critical</button>
-              <button class="filter-btn" data-filter="warning"><span class="badge-dot yellow"></span> Warning</button>
-              <button class="filter-btn" data-filter="info"><span class="badge-dot green"></span> Safe/Info</button>
+              <button class="filter-btn active" data-filter="all">All Incidents</button>
+              <button class="filter-btn" data-filter="critical"><span class="badge-dot red"></span> Critical Hazards</button>
+              <button class="filter-btn" data-filter="warning"><span class="badge-dot yellow"></span> Parameter Warnings</button>
+              <button class="filter-btn" data-filter="info"><span class="badge-dot green"></span> Safe / Informational</button>
             </div>
 
             <div class="alerts-list" id="alerts-list">
-              <!-- Alerts are dynamically populated here -->
+              <!-- Dynamically populated by script.js -->
               <div class="alert-empty-state">
                 <i class="fa-solid fa-circle-check"></i>
-                <p>System is online. No warnings or parameter violations recorded.</p>
+                <p>System operational. No active parameter violations or hardware incidents recorded.</p>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ==================== MONITORING REPORTS SECTION ==================== -->
+        <!-- ==================== 4. MONITORING REPORTS SECTION ==================== -->
         <section id="reports-section" class="content-section">
           <div class="section-header no-print">
             <div>
-              <h2>Monitoring Reports</h2>
-              <p>Statistical summaries and downloadable tabular data transcripts</p>
+              <h2>Compliance & Audit Reports</h2>
+              <p>Statistical metrics and downloadable time-series data records for regulatory compliance</p>
             </div>
             <div class="report-actions">
               <button id="btn-export-csv" class="btn btn-success">
-                <i class="fa-solid fa-file-csv"></i> Export CSV
+                <i class="fa-solid fa-file-csv"></i> Export CSV Dataset
               </button>
               <button id="btn-print-report" class="btn btn-primary">
-                <i class="fa-solid fa-print"></i> Print Report
+                <i class="fa-solid fa-print"></i> Print Formal Audit Report
               </button>
             </div>
           </div>
 
-          <!-- Printed Header (only visible on printouts) -->
+          <!-- Printed Header (Print-only) -->
           <div class="print-header-only">
             <div class="print-logo-area">
-              <h2>AI-Powered IoT Industrial Wastewater Quality Monitoring</h2>
-              <p>made by batch 7 &copy; 2026</p>
+              <h2>IoT-Based Industrial Wastewater Quality Monitoring and Alert System</h2>
+              <p>Department of Information Science & Engineering • SJB Institute of Technology</p>
             </div>
             <hr>
-            <h3>Industrial Effluent Audit Report</h3>
+            <h3>Industrial Effluent Audit & Compliance Transcript</h3>
             <p><strong>Generation Date:</strong> <span class="print-date"></span></p>
-            <p><strong>Channel ID:</strong> <span class="print-channel"></span></p>
+            <p><strong>ThingSpeak Channel:</strong> <span class="print-channel"></span></p>
           </div>
 
           <!-- Statistical Metrics Grid -->
           <div class="report-section-title">
-            <h3><i class="fa-solid fa-chart-bar"></i> Parameter Statistics (Last 50 Samples)</h3>
+            <h3><i class="fa-solid fa-chart-bar"></i> Aggregated Parameter Statistics (50 Samples)</h3>
           </div>
           <div class="stats-table-wrapper">
             <table class="report-table stats-table">
               <thead>
                 <tr>
                   <th>Sensor Metric</th>
-                  <th>Latest Value</th>
-                  <th>Average (Mean)</th>
+                  <th>Current Reading</th>
+                  <th>Mean (Average)</th>
                   <th>Minimum (Min)</th>
                   <th>Maximum (Max)</th>
-                  <th>Safe Threshold</th>
+                  <th>Regulatory Standard (CPCB)</th>
                 </tr>
               </thead>
               <tbody>
@@ -493,7 +579,7 @@
                   <td id="stat-avg-ph">--</td>
                   <td id="stat-min-ph">--</td>
                   <td id="stat-max-ph">--</td>
-                  <td>6.5 - 8.5 pH</td>
+                  <td><span class="std-badge">6.5 – 8.5 pH</span></td>
                 </tr>
                 <tr>
                   <td><span class="dot-indicator tds"></span> <strong>Total Dissolved Solids (TDS)</strong></td>
@@ -501,7 +587,7 @@
                   <td id="stat-avg-tds">--</td>
                   <td id="stat-min-tds">--</td>
                   <td id="stat-max-tds">--</td>
-                  <td>0 - 500 ppm</td>
+                  <td><span class="std-badge">0 – 500 ppm</span></td>
                 </tr>
                 <tr>
                   <td><span class="dot-indicator turbidity"></span> <strong>Turbidity</strong></td>
@@ -509,7 +595,7 @@
                   <td id="stat-avg-turbidity">--</td>
                   <td id="stat-min-turbidity">--</td>
                   <td id="stat-max-turbidity">--</td>
-                  <td>0 - 5 NTU</td>
+                  <td><span class="std-badge">0 – 100 NTU (Effluent)</span></td>
                 </tr>
                 <tr>
                   <td><span class="dot-indicator temp"></span> <strong>Water Temperature</strong></td>
@@ -517,7 +603,7 @@
                   <td id="stat-avg-temp">--</td>
                   <td id="stat-min-temp">--</td>
                   <td id="stat-max-temp">--</td>
-                  <td>20 - 35 °C</td>
+                  <td><span class="std-badge">20 – 35 °C</span></td>
                 </tr>
               </tbody>
             </table>
@@ -525,7 +611,7 @@
 
           <!-- Raw Data Table -->
           <div class="report-section-title print-margin-top">
-            <h3><i class="fa-solid fa-list"></i> Raw Data History Log</h3>
+            <h3><i class="fa-solid fa-list-check"></i> Raw Telemetry Feed Log</h3>
           </div>
           <div class="raw-table-wrapper">
             <table class="report-table raw-data-table" id="raw-data-table">
@@ -536,40 +622,40 @@
                   <th>TDS (ppm)</th>
                   <th>Turbidity (NTU)</th>
                   <th>Temperature (°C)</th>
-                  <th>Status</th>
+                  <th>Hardware Status</th>
                 </tr>
               </thead>
               <tbody id="raw-data-body">
                 <tr>
-                  <td colspan="6" class="table-empty">Awaiting data fetch...</td>
+                  <td colspan="6" class="table-empty">Awaiting data stream from ThingSpeak...</td>
                 </tr>
               </tbody>
             </table>
           </div>
           
-          <!-- Print Footer -->
+          <!-- Print Footer (Print-only) -->
           <div class="print-footer-only">
             <hr>
             <div class="footer-sign-off">
               <div>
-                <p>Checked By:</p>
+                <p>Inspected & Approved By:</p>
                 <div class="signature-line"></div>
                 <p>Project Supervisor / Reviewer</p>
               </div>
               <div>
-                <p>System Operating Mode: <span class="print-mode-text">LIVE</span></p>
-                <p>Report ID: <span class="print-report-id"></span></p>
+                <p>Operating Mode: <span class="print-mode-text">LIVE CLOUD</span></p>
+                <p>Audit Report ID: <span class="print-report-id"></span></p>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ==================== SYSTEM STATUS SECTION ==================== -->
+        <!-- ==================== 5. SYSTEM STATUS & CONFIG SECTION ==================== -->
         <section id="system-section" class="content-section">
           <div class="section-header">
             <div>
-              <h2>System Status & Configuration</h2>
-              <p>ThingSpeak cloud integration parameters and field hardware node diagnostics</p>
+              <h2>System Diagnostics & Configuration</h2>
+              <p>ThingSpeak REST API cloud parameters and wireless field sensor probe diagnostics</p>
             </div>
           </div>
 
@@ -577,76 +663,84 @@
             
             <!-- Connection Setup Card -->
             <div class="config-card">
-              <h3><i class="fa-solid fa-cloud-arrow-down"></i> ThingSpeak Connection Parameters</h3>
-              <p class="config-desc">Configure your specific channel ID and Read API Key to bind the dashboard to your live field hardware transmitter.</p>
+              <div class="config-card-header">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+                <div>
+                  <h3>ThingSpeak API Parameters</h3>
+                  <p class="config-desc">Bind this client console to your custom Channel ID and Read API Key.</p>
+                </div>
+              </div>
               
               <form id="thingspeak-config-form" class="config-form">
                 <div class="form-group">
                   <label for="input-channel-id">ThingSpeak Channel ID</label>
-                  <input type="text" id="input-channel-id" placeholder="e.g. 1234567" required>
+                  <input type="text" id="input-channel-id" placeholder="e.g. 3408255" required>
                 </div>
                 <div class="form-group">
-                  <label for="input-api-key">Read API Key</label>
-                  <input type="password" id="input-api-key" placeholder="Enter API Key" required>
+                  <label for="input-api-key">Read API Key (Optional for Public)</label>
+                  <input type="password" id="input-api-key" placeholder="Enter API Key">
                 </div>
                 
-                <!-- Demo Mode disabled to enforce live Cloud integration only -->
-
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save & Connect</button>
-                  <button type="button" id="btn-load-default-public" class="btn btn-secondary-outline">Use Default Public Channel</button>
+                  <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save & Reconnect</button>
+                  <button type="button" id="btn-load-default-public" class="btn btn-secondary-outline">Reset to Default Public Channel</button>
                 </div>
               </form>
             </div>
 
             <!-- Hardware Diagnostic Card -->
             <div class="config-card">
-              <h3><i class="fa-solid fa-microchip"></i> Hardware Nodes Diagnostics</h3>
-              <p class="config-desc">Diagnostic health check of wireless ESP8266/ESP32 sensor modules based on telemetry timestamps.</p>
+              <div class="config-card-header">
+                <i class="fa-solid fa-microchip"></i>
+                <div>
+                  <h3>Hardware Nodes Diagnostics</h3>
+                  <p class="config-desc">Real-time health check of individual physical probes based on incoming feed payloads.</p>
+                </div>
+              </div>
               
               <div class="diagnostic-list">
                 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-flask-vial"></i> pH Glass Electrode Probe</span>
+                    <span class="sensor-title"><i class="fa-solid fa-flask-vial"></i> Analog pH Glass Probe</span>
                     <span class="status-indicator online" id="status-sensor-ph"><i class="fa-solid fa-circle"></i> Online</span>
                   </div>
                   <div class="diag-meta">
                     <span>Field: <code>field1</code></span>
-                    <span>Status: Transmitting</span>
+                    <span>Pinout: GPIO 34 (ADC1_CH6)</span>
                   </div>
                 </div>
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-filter"></i> TDS Condenser Probe</span>
+                    <span class="sensor-title"><i class="fa-solid fa-filter"></i> Analog TDS Conductivity Probe</span>
                     <span class="status-indicator online" id="status-sensor-tds"><i class="fa-solid fa-circle"></i> Online</span>
                   </div>
                   <div class="diag-meta">
                     <span>Field: <code>field2</code></span>
-                    <span>Status: Transmitting</span>
+                    <span>Pinout: GPIO 35 (ADC1_CH7)</span>
                   </div>
                 </div>
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-smog"></i> Turbidity Optoelectronic Sensor</span>
+                    <span class="sensor-title"><i class="fa-solid fa-smog"></i> Optoelectronic Turbidity Sensor</span>
                     <span class="status-indicator online" id="status-sensor-turbidity"><i class="fa-solid fa-circle"></i> Online</span>
                   </div>
                   <div class="diag-meta">
                     <span>Field: <code>field3</code></span>
-                    <span>Status: Transmitting</span>
+                    <span>Pinout: GPIO 32 (ADC1_CH4)</span>
                   </div>
                 </div>
 
                 <div class="diagnostic-item">
                   <div class="diag-header">
-                    <span class="sensor-title"><i class="fa-solid fa-thermometer"></i> DS18B20 Temp Sensor</span>
+                    <span class="sensor-title"><i class="fa-solid fa-thermometer"></i> DS18B20 Digital Temp Sensor</span>
                     <span class="status-indicator online" id="status-sensor-temp"><i class="fa-solid fa-circle"></i> Online</span>
                   </div>
                   <div class="diag-meta">
                     <span>Field: <code>field4</code></span>
-                    <span>Status: Transmitting</span>
+                    <span>Pinout: GPIO 4 (1-Wire Bus)</span>
                   </div>
                 </div>
 
@@ -655,25 +749,31 @@
 
           </div>
 
-          <!-- Project Information Panel (VTU Viva prep) -->
+          <!-- Academic & System Accreditation Card -->
           <div class="config-card system-info-wide-card">
-            <h3><i class="fa-solid fa-circle-info"></i> Project Exhibition & Review Details</h3>
+            <div class="config-card-header">
+              <i class="fa-solid fa-circle-info"></i>
+              <div>
+                <h3>Project Review & System Accreditation Specifications</h3>
+                <p class="config-desc">Academic documentation details for major project evaluation and viva examination.</p>
+              </div>
+            </div>
             <div class="system-info-grid">
-              <div>
-                <strong>Project Title:</strong>
-                <p>AI-Powered IoT-Based Industrial Wastewater Quality Monitoring System</p>
+              <div class="info-cell">
+                <strong>Project Title</strong>
+                <p>IoT-Based Industrial Wastewater Quality Monitoring and Alert System</p>
               </div>
-              <div>
-                <strong>Wastewater Standard Reference:</strong>
-                <p>CPCB (Central Pollution Control Board) & WHO Effluent Discharge Standards</p>
+              <div class="info-cell">
+                <strong>Institution & Department</strong>
+                <p>SJB Institute of Technology (SJBIT), Department of Information Science & Engineering (ISE)</p>
               </div>
-              <div>
-                <strong>AI Algorithm Logic:</strong>
-                <p>Water Quality Index (WQI) scoring combined with an Edge Inference Classifier mapping to 5 distinct wastewater grades (Excellent, Good, Moderate, Poor, Critical) for treatment automation.</p>
+              <div class="info-cell">
+                <strong>Regulatory Standards</strong>
+                <p>Central Pollution Control Board (CPCB) General Effluent Discharge Norms & WHO Standards</p>
               </div>
-              <div>
-                <strong>Hardware Architecture:</strong>
-                <p>ESP8266 NodeMCU/ESP32 Wifi Module + Analog Sensor Shield + ThingSpeak Cloud REST Engine</p>
+              <div class="info-cell">
+                <strong>Decision Algorithms</strong>
+                <p>Weighted Arithmetic Water Quality Index (WQI) scoring combined with an Edge Inference Classifier for automated treatment recommendations.</p>
               </div>
             </div>
           </div>
@@ -685,7 +785,7 @@
     </div>
   </div>
 
-  <!-- Audio elements for alert chiming -->
+  <!-- Audio element for alert notifications -->
   <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
 
   <!-- JavaScript file -->

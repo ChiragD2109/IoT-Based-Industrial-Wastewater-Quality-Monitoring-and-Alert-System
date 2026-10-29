@@ -134,13 +134,39 @@ setInterval(updateClock, 1000);
 updateClock();
 
 DOM.sidebarToggle.addEventListener("click", () => {
-  DOM.sidebar.classList.toggle("mobile-open");
+  if (window.innerWidth <= 768) {
+    DOM.sidebar.classList.toggle("mobile-open");
+  } else {
+    DOM.sidebar.classList.toggle("collapsed");
+  }
+
+  // Trigger chart resize smoothly after sidebar transition
+  setTimeout(() => {
+    Object.keys(state.charts).forEach(key => {
+      if (state.charts[key]) {
+        state.charts[key].resize();
+      }
+    });
+  }, 320);
+});
+
+// Close mobile sidebar when clicking outside
+document.addEventListener("click", (e) => {
+  if (window.innerWidth <= 768) {
+    if (DOM.sidebar.classList.contains("mobile-open") &&
+        !DOM.sidebar.contains(e.target) &&
+        !DOM.sidebarToggle.contains(e.target)) {
+      DOM.sidebar.classList.remove("mobile-open");
+    }
+  }
 });
 
 DOM.navLinks.forEach(link => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
-    DOM.sidebar.classList.remove("mobile-open");
+    if (window.innerWidth <= 768) {
+      DOM.sidebar.classList.remove("mobile-open");
+    }
     
     const targetSectionId = link.getAttribute("data-target");
     DOM.navLinks.forEach(nl => nl.classList.remove("active"));
@@ -320,11 +346,11 @@ function runAIInference(ph, tds, turb, temp) {
 
 function initCharts() {
   const chartConfigs = [
-    { id: "chart-ph-canvas", label: "pH Level", color: "#A855F7", border: "#A855F7" },
-    { id: "chart-tds-canvas", label: "TDS (ppm)", color: "#00E5FF", border: "#00E5FF" },
-    { id: "chart-turbidity-canvas", label: "Turbidity (NTU)", color: "#F59E0B", border: "#F59E0B" },
-    { id: "chart-temp-canvas", label: "Temperature (°C)", color: "#EF4444", border: "#EF4444" },
-    { id: "chart-status-canvas", label: "System Status (0=SAFE, 1=UNSAFE)", color: "#6366F1", border: "#6366F1", isStatus: true }
+    { id: "chart-ph-canvas", label: "pH Level", color: "#0F766E", border: "#0F766E" },
+    { id: "chart-tds-canvas", label: "TDS (ppm)", color: "#3B82F6", border: "#3B82F6" },
+    { id: "chart-turbidity-canvas", label: "Turbidity (NTU)", color: "#D97706", border: "#D97706" },
+    { id: "chart-temp-canvas", label: "Temperature (°C)", color: "#DC2626", border: "#DC2626" },
+    { id: "chart-status-canvas", label: "System Status (0=SAFE, 1=UNSAFE)", color: "#4F46E5", border: "#4F46E5", isStatus: true }
   ];
 
   chartConfigs.forEach(cfg => {
@@ -332,9 +358,9 @@ function initCharts() {
     
     const fillGrd = ctx.createLinearGradient(0, 0, 0, 180);
     fillGrd.addColorStop(0, cfg.color + "20");
-    fillGrd.addColorStop(1, cfg.color + "00");
+    fillGrd.addColorStop(1, cfg.color + "02");
 
-    let yTicksConfig = { font: { size: 9 }, color: '#94A3B8' };
+    let yTicksConfig = { font: { family: "'Inter', sans-serif", size: 10 }, color: '#64748B' };
     if (cfg.isStatus) {
       yTicksConfig.stepSize = 1;
       yTicksConfig.min = 0;
@@ -356,11 +382,13 @@ function initCharts() {
           borderColor: cfg.border,
           backgroundColor: fillGrd,
           borderWidth: 2,
-          pointRadius: 2,
+          pointRadius: 2.5,
           pointHoverRadius: 5,
           pointBackgroundColor: cfg.border,
+          pointBorderColor: "#FFFFFF",
+          pointBorderWidth: 1.5,
           fill: true,
-          tension: 0.3
+          tension: 0.35
         }]
       },
       options: {
@@ -371,13 +399,16 @@ function initCharts() {
           tooltip: {
             mode: 'index',
             intersect: false,
-            backgroundColor: '#0c101a',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: '#FFFFFF',
+            borderColor: '#E2E8F0',
             borderWidth: 1,
-            titleFont: { family: 'Outfit', weight: 'bold', size: 11 },
-            bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
-            titleColor: '#ffffff',
-            bodyColor: '#94A3B8',
+            titleFont: { family: "'Inter', sans-serif", weight: '600', size: 11 },
+            bodyFont: { family: "'Inter', sans-serif", size: 11 },
+            titleColor: '#0F172A',
+            bodyColor: '#475569',
+            padding: 10,
+            cornerRadius: 8,
+            boxPadding: 4,
             callbacks: cfg.isStatus ? {
               label: function(context) {
                 let val = context.raw;
@@ -390,11 +421,11 @@ function initCharts() {
         },
         scales: {
           x: {
-            grid: { color: 'rgba(255, 255, 255, 0.04)' },
-            ticks: { maxTicksLimit: 6, font: { size: 9 }, color: '#94A3B8' }
+            grid: { color: '#F1F5F9' },
+            ticks: { maxTicksLimit: 6, font: { family: "'Inter', sans-serif", size: 10 }, color: '#64748B' }
           },
           y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            grid: { color: '#F1F5F9' },
             ticks: yTicksConfig
           }
         }
